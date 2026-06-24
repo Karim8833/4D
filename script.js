@@ -9,6 +9,7 @@ import {
   getFirestore, 
   collection, 
   addDoc, 
+  getDoc,
   deleteDoc, 
   doc, 
   updateDoc, 
@@ -107,6 +108,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function loginUserSession(username, role) {
+    // Save authentication session details to persist on reload
+    sessionStorage.setItem('fd_user', JSON.stringify({ username, role }));
+
     document.getElementById('login-container').style.display = 'none';
     document.getElementById('app-wrapper').style.display = 'block';
     document.getElementById('user-display-name').textContent = username;
@@ -282,15 +286,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.deleteUser = async function(id) {
     try {
       const docRef = doc(db, "users", id);
-      
-      // Prevent deleting the main admin by username
-      const allUsers = await getDocs(usersCol);
-      let targetUsername = '';
-      allUsers.forEach(d => {
-        if (d.id === id) {
-          targetUsername = d.data().username;
-        }
-      });
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        showToast("المستخدم غير موجود.", "danger");
+        return;
+      }
+
+      const targetUsername = docSnap.data().username;
 
       if (targetUsername === 'admin') {
         showToast("لا يمكن حذف حساب المسؤول الرئيسي للموقع.", "danger");

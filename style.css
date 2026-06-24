@@ -11,19 +11,19 @@
   --bg-card: #1C1C1C;
   --bg-input: #242424;
   --bg-input-focus: #2C2C2C;
-  
+
   /* Mustard Yellow Accents */
   --accent-mustard: #E4B363;
-  --accent-mustard-hover: #F0C988;
+  --accent-mustard-hover: #ECC180;
   --accent-mustard-glow: rgba(228, 179, 99, 0.15);
   --accent-mustard-border: rgba(228, 179, 99, 0.3);
-  
+
   /* Text colors */
   --text-primary: #F5F5F5;
   --text-secondary: #B5B5B5;
   --text-muted: #777777;
   --text-dark: #121212;
-  
+
   /* Structural variables */
   --border-radius-sm: 6px;
   --border-radius-md: 12px;
@@ -140,7 +140,8 @@ body {
 
 .search-input {
   width: 100%;
-  padding: 12px 20px 12px 45px; /* more padding on left for icon */
+  padding: 12px 20px 12px 45px;
+  /* more padding on left for icon */
   background-color: var(--bg-input);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--border-radius-full);
@@ -158,7 +159,8 @@ body {
 
 .search-icon {
   position: absolute;
-  left: 20px; /* Left aligned in RTL */
+  left: 20px;
+  /* Left aligned in RTL */
   right: auto;
   top: 50%;
   transform: translateY(-50%);
@@ -168,13 +170,14 @@ body {
   transition: var(--transition-smooth);
 }
 
-.search-input:focus + .search-icon {
+.search-input:focus+.search-icon {
   color: var(--accent-mustard);
 }
 
 .clear-search-btn {
   position: absolute;
-  left: 42px; /* Left aligned in RTL */
+  left: 42px;
+  /* Left aligned in RTL */
   right: auto;
   top: 50%;
   transform: translateY(-50%);
@@ -243,11 +246,13 @@ body {
 .login-card {
   width: 100%;
   max-width: 440px;
-  background-color: var(--bg-card);
-  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(28, 28, 28, 0.8);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(228, 179, 99, 0.1);
   border-radius: var(--border-radius-lg);
   padding: 40px;
-  box-shadow: var(--shadow-subtle);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
   animation: fadeIn 0.5s ease-out;
 }
 
@@ -285,7 +290,8 @@ body {
 }
 
 .input-icon-wrapper .form-input {
-  padding-right: 45px; /* extra space on right for icon */
+  padding-right: 45px;
+  /* extra space on right for icon */
   padding-left: 15px;
 }
 
@@ -299,7 +305,7 @@ body {
   transition: var(--transition-smooth);
 }
 
-.input-icon-wrapper .form-input:focus + .input-icon {
+.input-icon-wrapper .form-input:focus+.input-icon {
   color: var(--accent-mustard);
 }
 
@@ -331,7 +337,8 @@ body {
   font-size: 20px;
   font-weight: 700;
   margin-bottom: 25px;
-  border-right: 4px solid var(--accent-mustard); /* RTL right border */
+  border-right: 4px solid var(--accent-mustard);
+  /* RTL right border */
   border-left: none;
   padding-right: 12px;
   padding-left: 0;
@@ -350,7 +357,9 @@ body {
   margin-bottom: 8px;
 }
 
-.form-input, .form-textarea, .form-select {
+.form-input,
+.form-textarea,
+.form-select {
   width: 100%;
   background-color: var(--bg-input);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -368,12 +377,15 @@ body {
   -webkit-appearance: none;
   background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23E4B363' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
   background-repeat: no-repeat;
-  background-position: left 15px center; /* left side for dropdown arrow in RTL */
+  background-position: left 15px center;
+  /* left side for dropdown arrow in RTL */
   background-size: 18px;
   padding-left: 45px;
 }
 
-.form-input:focus, .form-textarea:focus, .form-select:focus {
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
   border-color: var(--accent-mustard);
   background-color: var(--bg-input-focus);
   box-shadow: 0 0 12px rgba(228, 179, 99, 0.1);
@@ -413,7 +425,8 @@ body {
   height: 20px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: var(--border-radius-sm);
-  margin-left: 10px; /* Space on left of box in RTL */
+  margin-left: 10px;
+  /* Space on left of box in RTL */
   margin-right: 0;
   display: flex;
   align-items: center;
@@ -425,13 +438,13 @@ body {
   border-color: var(--accent-mustard);
 }
 
-.checkbox-container input:checked + .custom-checkbox {
+.checkbox-container input:checked+.custom-checkbox {
   background-color: var(--accent-mustard);
   border-color: var(--accent-mustard);
   box-shadow: 0 0 8px rgba(228, 179, 99, 0.3);
 }
 
-.checkbox-container input:checked + .custom-checkbox::after {
+.checkbox-container input:checked+.custom-checkbox::after {
   content: "✓";
   color: var(--text-dark);
   font-weight: 800;
@@ -475,7 +488,8 @@ body {
 
 /* Admin Dashboard panels styling */
 .admin-panel {
-  grid-column: 1 / -1; /* spans full width on desktop above messages form and feed */
+  grid-column: 1 / -1;
+  /* spans full width on desktop above messages form and feed */
   border-color: rgba(228, 179, 99, 0.15);
 }
 
@@ -675,7 +689,8 @@ body {
   content: "";
   position: absolute;
   top: 0;
-  right: 0; /* RTL right edge */
+  right: 0;
+  /* RTL right edge */
   left: auto;
   width: 4px;
   height: 100%;
@@ -753,10 +768,12 @@ body {
   padding: 12px;
   overflow-y: auto;
   margin-bottom: 16px;
-  white-space: pre-wrap;      /* Preserves spaces & line breaks */
-  word-break: break-word;     
+  white-space: pre-wrap;
+  /* Preserves spaces & line breaks */
+  word-break: break-word;
   scrollbar-width: thin;
-  text-align: right;          /* Arabic right aligned text */
+  text-align: right;
+  /* Arabic right aligned text */
   direction: rtl;
 }
 
@@ -833,7 +850,8 @@ body {
 .toast-container {
   position: fixed;
   bottom: 25px;
-  left: 25px; /* bottom-left overlay in RTL is standard or bottom-right. Let's make it bottom-right for clean view */
+  left: 25px;
+  /* bottom-left overlay in RTL is standard or bottom-right. Let's make it bottom-right for clean view */
   right: auto;
   z-index: 999;
   display: flex;
@@ -851,7 +869,8 @@ body {
 
 .toast {
   background-color: #1a1a1a;
-  border-right: 4px solid var(--accent-mustard); /* RTL right border */
+  border-right: 4px solid var(--accent-mustard);
+  /* RTL right border */
   border-left: none;
   color: var(--text-primary);
   padding: 14px 20px;
@@ -907,6 +926,7 @@ body {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -915,9 +935,11 @@ body {
 
 @keyframes slideInRTL {
   from {
-    transform: translateX(-100%); /* Slide in from left on RTL screens */
+    transform: translateX(-100%);
+    /* Slide in from left on RTL screens */
     opacity: 0;
   }
+
   to {
     transform: translateX(0);
     opacity: 1;
@@ -927,9 +949,11 @@ body {
 @media (min-width: 600px) {
   @keyframes slideInRTL {
     from {
-      transform: translateX(100%); /* Slide in from right for desktop bottom-right alignment */
+      transform: translateX(100%);
+      /* Slide in from right for desktop bottom-right alignment */
       opacity: 0;
     }
+
     to {
       transform: translateX(0);
       opacity: 1;
@@ -938,9 +962,17 @@ body {
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-8px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 /* Responsive Footer styling */
