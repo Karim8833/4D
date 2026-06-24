@@ -1,135 +1,267 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Four Directions Message Vault</title>
+  <title>خزنة رسائل فور دايركشنز</title>
   <!-- FontAwesome for Premium Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Cairo (Arabic) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Sticky Header & Glassmorphic Navigation -->
-  <header class="main-header">
-    <div class="app-container header-content">
-      <a href="#" class="logo-brand">
-        <img src="logo.png" alt="Four Directions Logo">
-        <span class="brand-name">Four <span class="brand-accent">Directions</span></span>
-      </a>
-      
-      <!-- Real-time Search Bar -->
-      <div class="search-wrapper">
-        <input 
-          type="text" 
-          id="search-input" 
-          class="search-input" 
-          placeholder="Search titles or contents..." 
-          aria-label="Search Messages"
-          autocomplete="off"
-        >
-        <button id="clear-search" class="clear-search-btn" title="Clear Search">
-          <i class="fa-solid fa-xmark"></i>
-        </button>
-        <span class="search-icon">
-          <i class="fa-solid fa-magnifying-glass"></i>
-        </span>
+  <!-- ==================== 1. LOGIN SCREEN ==================== -->
+  <div id="login-container" class="login-wrapper">
+    <div class="login-card">
+      <div class="login-brand">
+        <img src="logo.png" alt="شعار فور دايركشنز">
+        <h1>فور <span class="brand-accent">دايركشنز</span></h1>
+        <p class="login-subtitle">خزنة الرسائل الرقمية</p>
       </div>
-    </div>
-  </header>
-
-  <!-- Main SPA Layout Grid -->
-  <main class="app-container dashboard-grid">
-    
-    <!-- Left Column: Input Form Panel -->
-    <section class="vault-panel" aria-labelledby="form-panel-title">
-      <h2 id="form-panel-title" class="panel-title">Create Message</h2>
       
-      <form id="message-form" novalidate>
-        <!-- Message Title -->
+      <form id="login-form" class="login-form">
         <div class="form-group">
-          <label for="message-title" class="form-label">Message Title</label>
-          <input 
-            type="text" 
-            id="message-title" 
-            class="form-input" 
-            placeholder="e.g. Follow-up Discount Offer" 
-            required
-            maxlength="80"
-          >
-        </div>
-
-        <!-- WhatsApp Message Textarea -->
-        <div class="form-group">
-          <label for="message-text" class="form-label">WhatsApp Message</label>
-          <textarea 
-            id="message-text" 
-            class="form-textarea" 
-            placeholder="Type or paste your message here exactly as it should look on WhatsApp. Spaces, line breaks, and emojis 🚀 are fully preserved." 
-            required
-          ></textarea>
-          
-          <!-- Textarea Metadata / Counter -->
-          <div class="form-row-meta">
-            <span>Spaces & Emojis Preserved</span>
-            <span id="char-count">0 characters | 0 words</span>
+          <label for="login-username" class="form-label">اسم المستخدم</label>
+          <div class="input-icon-wrapper">
+            <input 
+              type="text" 
+              id="login-username" 
+              class="form-input" 
+              placeholder="مثال: admin" 
+              required
+              autocomplete="username"
+            >
+            <span class="input-icon"><i class="fa-solid fa-user"></i></span>
           </div>
         </div>
-
-        <!-- Pin Message Checkbox Option -->
-        <label class="checkbox-container">
-          <input type="checkbox" id="message-pin">
-          <span class="custom-checkbox"></span>
-          <span class="checkbox-label">Pin this message to the top</span>
-        </label>
-
-        <!-- Submit Button -->
-        <button type="submit" class="btn-primary" id="save-btn">
-          <i class="fa-solid fa-square-plus"></i>
-          Save to Vault
+        
+        <div class="form-group">
+          <label for="login-password" class="form-label">كلمة المرور</label>
+          <div class="input-icon-wrapper">
+            <input 
+              type="password" 
+              id="login-password" 
+              class="form-input" 
+              placeholder="••••••••" 
+              required
+              autocomplete="current-password"
+            >
+            <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
+          </div>
+        </div>
+        
+        <button type="submit" class="btn-primary" id="login-btn">
+          <i class="fa-solid fa-right-to-bracket"></i>
+          تسجيل الدخول
         </button>
       </form>
-    </section>
-
-    <!-- Right Column: Message Feed Panel -->
-    <section class="feed-panel" aria-labelledby="feed-panel-title">
-      <!-- Feed Header Toolbar -->
-      <div class="feed-header">
-        <div class="feed-title-count">
-          <h2 id="feed-panel-title" class="feed-title">Message Vault</h2>
-          <span id="messages-count" class="feed-count">0</span>
-        </div>
-        
-        <!-- Filter Tabs -->
-        <nav class="filter-tabs" aria-label="Message Filter Tabs">
-          <button id="filter-all" class="tab-btn active" data-filter="all">All</button>
-          <button id="filter-pinned" class="tab-btn" data-filter="pinned">
-            <i class="fa-solid fa-thumbtack" style="margin-right: 4px;"></i> Pinned
-          </button>
-        </nav>
-      </div>
-
-      <!-- Messages Grid Feed -->
-      <div id="messages-grid" class="message-grid">
-        <!-- Message cards will be dynamically injected here via JavaScript -->
-        
-        <!-- Fallback Empty State (Styled in style.css) -->
-        <div id="empty-state" class="empty-state">
-          <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
-          <h3 class="empty-title">Your vault is empty</h3>
-          <p class="empty-desc">Create your first WhatsApp message template on the left panel to populate your vault.</p>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- App Footer -->
-  <footer class="app-footer">
-    <div class="app-container">
-      <p>&copy; 2026 Four Directions. All rights reserved.</p>
     </div>
-  </footer>
+  </div>
+
+  <!-- ==================== 2. MAIN APPLICATION CONTENT ==================== -->
+  <div id="app-wrapper" class="app-wrapper" style="display: none;">
+    <!-- Sticky Header & Glassmorphic Navigation -->
+    <header class="main-header">
+      <div class="app-container header-content">
+        <div class="header-right">
+          <a href="#" class="logo-brand">
+            <img src="logo.png" alt="شعار فور دايركشنز">
+            <span class="brand-name">فور <span class="brand-accent">دايركشنز</span></span>
+          </a>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+          <input 
+            type="text" 
+            id="search-input" 
+            class="search-input" 
+            placeholder="ابحث في العناوين أو المحتويات..." 
+            aria-label="بحث في الرسائل"
+            autocomplete="off"
+          >
+          <button id="clear-search" class="clear-search-btn" title="مسح البحث">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+          <span class="search-icon">
+            <i class="fa-solid fa-magnifying-glass"></i>
+          </span>
+        </div>
+
+        <div class="header-left">
+          <div class="user-meta">
+            <span class="user-greeting">مرحباً، <strong id="user-display-name">...</strong></span>
+            <button id="logout-btn" class="btn-logout" title="تسجيل الخروج">
+              <i class="fa-solid fa-right-from-bracket"></i>
+              <span>خروج</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Layout Grid -->
+    <main class="app-container dashboard-grid">
+      
+      <!-- Right Panel: Message Creation Form -->
+      <section class="vault-panel" aria-labelledby="form-panel-title">
+        <h2 id="form-panel-title" class="panel-title">إنشاء رسالة</h2>
+        
+        <form id="message-form" novalidate>
+          <!-- Message Title -->
+          <div class="form-group">
+            <label for="message-title" class="form-label">عنوان الرسالة</label>
+            <input 
+              type="text" 
+              id="message-title" 
+              class="form-input" 
+              placeholder="مثال: عرض الخصم للمتابعة" 
+              required
+              maxlength="80"
+            >
+          </div>
+
+          <!-- WhatsApp Message Textarea -->
+          <div class="form-group">
+            <label for="message-text" class="form-label">رسالة الواتساب</label>
+            <textarea 
+              id="message-text" 
+              class="form-textarea" 
+              placeholder="اكتب أو الصق رسالتك هنا تماماً كما تريد أن تظهر على الواتساب. يتم حفظ الأسطر الجديدة والمسافات والرموز التعبيرية 🚀 تلقائياً." 
+              required
+            ></textarea>
+            
+            <!-- Metadata & Counter -->
+            <div class="form-row-meta">
+              <span>الرموز التعبيرية والتنسيق محفوظان</span>
+              <span id="char-count">0 حرف | 0 كلمة</span>
+            </div>
+          </div>
+
+          <!-- Pin Message checkbox -->
+          <label class="checkbox-container">
+            <input type="checkbox" id="message-pin">
+            <span class="custom-checkbox"></span>
+            <span class="checkbox-label">تثبيت هذه الرسالة في الأعلى</span>
+          </label>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-primary" id="save-btn">
+            <i class="fa-solid fa-square-plus"></i>
+            حفظ في المخزن
+          </button>
+        </form>
+      </section>
+
+      <!-- Admin Panel: Shown only for 'admin' role -->
+      <section id="admin-panel" class="vault-panel admin-panel" style="display: none;" aria-labelledby="admin-panel-title">
+        <h2 id="admin-panel-title" class="panel-title">لوحة التحكم للمسؤول</h2>
+        
+        <!-- Add User Form -->
+        <div class="admin-section-form">
+          <h3 class="admin-subtitle">إضافة مستخدم جديد</h3>
+          <form id="add-user-form" novalidate>
+            <div class="form-group">
+              <label for="admin-username" class="form-label">اسم المستخدم الجديد</label>
+              <input 
+                type="text" 
+                id="admin-username" 
+                class="form-input" 
+                placeholder="اسم المستخدم" 
+                required
+              >
+            </div>
+            
+            <div class="form-group">
+              <label for="admin-password" class="form-label">كلمة المرور</label>
+              <input 
+                type="password" 
+                id="admin-password" 
+                class="form-input" 
+                placeholder="كلمة المرور" 
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="admin-role" class="form-label">الصلاحية</label>
+              <select id="admin-role" class="form-select">
+                <option value="user">مستخدم عادي</option>
+                <option value="admin">مسؤول النظام</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn-primary btn-admin-save">
+              <i class="fa-solid fa-user-plus"></i>
+              إضافة المستخدم
+            </button>
+          </form>
+        </div>
+
+        <!-- Users Table -->
+        <div class="admin-section-table">
+          <h3 class="admin-subtitle">قائمة المستخدمين</h3>
+          <div class="table-responsive">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>اسم المستخدم</th>
+                  <th>الصلاحية</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <!-- User rows will be dynamically injected here -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- Left Panel: Feed Column -->
+      <section class="feed-panel" aria-labelledby="feed-panel-title">
+        <!-- Feed Header -->
+        <div class="feed-header">
+          <div class="feed-title-count">
+            <h2 id="feed-panel-title" class="feed-title">مخزن الرسائل</h2>
+            <span id="messages-count" class="feed-count">0</span>
+          </div>
+          
+          <!-- Filter Tabs -->
+          <nav class="filter-tabs" aria-label="ألسنة تصفية الرسائل">
+            <button id="filter-all" class="tab-btn active" data-filter="all">الكل</button>
+            <button id="filter-pinned" class="tab-btn" data-filter="pinned">
+              <i class="fa-solid fa-thumbtack" style="margin-left: 6px;"></i> مثبتة
+            </button>
+          </nav>
+        </div>
+
+        <!-- Messages Grid Feed -->
+        <div id="messages-grid" class="message-grid">
+          <!-- Dynamically injected message cards -->
+          
+          <!-- Fallback Empty State -->
+          <div id="empty-state" class="empty-state">
+            <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+            <h3 class="empty-title">المخزن فارغ حالياً</h3>
+            <p class="empty-desc font-arabic">أنشئ قالب رسالة واتساب الأول من اللوحة الجانبية لملء المخزن.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- App Footer -->
+    <footer class="app-footer">
+      <div class="app-container">
+        <p>&copy; 2026 فور دايركشنز. جميع الحقوق محفوظة.</p>
+      </div>
+    </footer>
+  </div>
 
   <!-- Toast Notification Overlay -->
   <div id="toast-container" class="toast-container" aria-live="polite"></div>
