@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Four Directions Message Vault</title>
+  <!-- FontAwesome for Premium Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Core Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Sticky Header & Glassmorphic Navigation -->
+  <header class="main-header">
+    <div class="app-container header-content">
+      <a href="#" class="logo-brand">
+        <img src="logo.png" alt="Four Directions Logo">
+        <span class="brand-name">Four <span class="brand-accent">Directions</span></span>
+      </a>
+      
+      <!-- Real-time Search Bar -->
+      <div class="search-wrapper">
+        <input 
+          type="text" 
+          id="search-input" 
+          class="search-input" 
+          placeholder="Search titles or contents..." 
+          aria-label="Search Messages"
+          autocomplete="off"
+        >
+        <button id="clear-search" class="clear-search-btn" title="Clear Search">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+        <span class="search-icon">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main SPA Layout Grid -->
+  <main class="app-container dashboard-grid">
+    
+    <!-- Left Column: Input Form Panel -->
+    <section class="vault-panel" aria-labelledby="form-panel-title">
+      <h2 id="form-panel-title" class="panel-title">Create Message</h2>
+      
+      <form id="message-form" novalidate>
+        <!-- Message Title -->
+        <div class="form-group">
+          <label for="message-title" class="form-label">Message Title</label>
+          <input 
+            type="text" 
+            id="message-title" 
+            class="form-input" 
+            placeholder="e.g. Follow-up Discount Offer" 
+            required
+            maxlength="80"
+          >
+        </div>
+
+        <!-- WhatsApp Message Textarea -->
+        <div class="form-group">
+          <label for="message-text" class="form-label">WhatsApp Message</label>
+          <textarea 
+            id="message-text" 
+            class="form-textarea" 
+            placeholder="Type or paste your message here exactly as it should look on WhatsApp. Spaces, line breaks, and emojis 🚀 are fully preserved." 
+            required
+          ></textarea>
+          
+          <!-- Textarea Metadata / Counter -->
+          <div class="form-row-meta">
+            <span>Spaces & Emojis Preserved</span>
+            <span id="char-count">0 characters | 0 words</span>
+          </div>
+        </div>
+
+        <!-- Pin Message Checkbox Option -->
+        <label class="checkbox-container">
+          <input type="checkbox" id="message-pin">
+          <span class="custom-checkbox"></span>
+          <span class="checkbox-label">Pin this message to the top</span>
+        </label>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn-primary" id="save-btn">
+          <i class="fa-solid fa-square-plus"></i>
+          Save to Vault
+        </button>
+      </form>
+    </section>
+
+    <!-- Right Column: Message Feed Panel -->
+    <section class="feed-panel" aria-labelledby="feed-panel-title">
+      <!-- Feed Header Toolbar -->
+      <div class="feed-header">
+        <div class="feed-title-count">
+          <h2 id="feed-panel-title" class="feed-title">Message Vault</h2>
+          <span id="messages-count" class="feed-count">0</span>
+        </div>
+        
+        <!-- Filter Tabs -->
+        <nav class="filter-tabs" aria-label="Message Filter Tabs">
+          <button id="filter-all" class="tab-btn active" data-filter="all">All</button>
+          <button id="filter-pinned" class="tab-btn" data-filter="pinned">
+            <i class="fa-solid fa-thumbtack" style="margin-right: 4px;"></i> Pinned
+          </button>
+        </nav>
+      </div>
+
+      <!-- Messages Grid Feed -->
+      <div id="messages-grid" class="message-grid">
+        <!-- Message cards will be dynamically injected here via JavaScript -->
+        
+        <!-- Fallback Empty State (Styled in style.css) -->
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon"><i class="fa-solid fa-box-open"></i></div>
+          <h3 class="empty-title">Your vault is empty</h3>
+          <p class="empty-desc">Create your first WhatsApp message template on the left panel to populate your vault.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- App Footer -->
+  <footer class="app-footer">
+    <div class="app-container">
+      <p>&copy; 2026 Four Directions. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Toast Notification Overlay -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
+
+  <!-- Client-Side Javascript Logic -->
+  <script type="module" src="script.js"></script>
+</body>
+</html>
