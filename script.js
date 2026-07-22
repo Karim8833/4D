@@ -36,16 +36,31 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const messagesCol = collection(db, "messages");
 const usersCol = collection(db, "users");
+const teamCol = collection(db, "team_members"); // New Team Members collection
 
 // Subscription unsubscribers
 let unsubscribeMessages = null;
 let unsubscribeUsers = null;
+let unsubscribeTeam = null;
 
 document.addEventListener('DOMContentLoaded', async () => {
   // DOM Elements - Login Section
   const loginForm = document.getElementById('login-form');
   const loginUsernameInput = document.getElementById('login-username');
   const loginPasswordInput = document.getElementById('login-password');
+
+  // DOM Elements - Sidebar & Layout
+  const navLinks = document.querySelectorAll('.nav-link');
+  const viewSections = document.querySelectorAll('.view-section');
+  const adminOnlyElements = document.querySelectorAll('.admin-only');
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+  const sidebar = document.getElementById('main-sidebar');
+
+  // DOM Elements - Home Stats
+  const statMessagesCount = document.getElementById('stat-messages-count');
+  const statTeamCount = document.getElementById('stat-team-count');
+  const homeStats = document.getElementById('home-stats');
 
   // DOM Elements - Messages Form Section
   const messageForm = document.getElementById('message-form');
@@ -68,7 +83,17 @@ document.addEventListener('DOMContentLoaded', async () => {
   const messagesCountBadge = document.getElementById('messages-count');
   const toastContainer = document.getElementById('toast-container');
 
-  // DOM Elements - Admin Section
+  // DOM Elements - Team Management Section
+  const addTeamForm = document.getElementById('add-team-form');
+  const teamMemberName = document.getElementById('team-member-name');
+  const teamMemberRank = document.getElementById('team-member-rank');
+  const teamMemberPhone = document.getElementById('team-member-phone');
+  const teamMemberPaymentMethod = document.getElementById('team-member-payment-method');
+  const teamMemberPaymentAccount = document.getElementById('team-member-payment-account');
+  const teamTableBody = document.getElementById('team-table-body');
+  const teamEmptyState = document.getElementById('team-empty-state');
+
+  // DOM Elements - Admin Users Section
   const addUserForm = document.getElementById('add-user-form');
   const adminUsernameInput = document.getElementById('admin-username');
   const adminPasswordInput = document.getElementById('admin-password');
@@ -76,6 +101,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Application State
   let messages = [];
+  let teamMembers = [];
   let currentFilter = 'all'; 
   let searchQuery = '';
 
@@ -85,7 +111,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // 2. Check active login session from sessionStorage
   checkSession();
 
-  // --- Session Management ---
+  // --- Session Management & RBAC ---
 
   function checkSession() {
     const savedUser = sessionStorage.getItem('fd_user');
@@ -108,25 +134,73 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function loginUserSession(username, role) {
-    // Save authentication session details to persist on reload
     sessionStorage.setItem('fd_user', JSON.stringify({ username, role }));
 
     document.getElementById('login-container').style.display = 'none';
     document.getElementById('app-wrapper').style.display = 'block';
     document.getElementById('user-display-name').textContent = username;
     
-    // Toggle Admin panel display based on role
-    const adminPanel = document.getElementById('admin-panel');
+    // RBAC: Toggle Admin-only elements
     if (role === 'admin') {
-      adminPanel.style.display = 'block';
+      adminOnlyElements.forEach(el => el.style.display = '');
       setupUsersRealtimeListener();
+      setupTeamRealtimeListener();
     } else {
-      adminPanel.style.display = 'none';
+      adminOnlyElements.forEach(el => el.style.display = 'none');
     }
 
-    // Set up messages query real-time synchronization
+    homeStats.style.display = 'flex';
     setupMessagesRealtimeListener();
     updateTextareaCounters();
+
+    // Default route
+    switchView('home-view');
+  }
+
+  // --- Navigation & Layout ---
+
+  navLinks.forEach(link => {
+    link.addEventListener('click', (e) => {
+      e.preventDefault();
+      const targetId = link.getAttribute('data-target');
+      switchView(targetId);
+      
+      // Close sidebar on mobile after clicking
+      if (window.innerWidth <= 768) {
+        sidebar.classList.remove('active');
+      }
+    });
+  });
+
+  mobileMenuBtn.addEventListener('click', () => {
+    sidebar.classList.toggle('active');
+  });
+
+  if (sidebarToggleBtn) {
+    sidebarToggleBtn.addEventListener('click', () => {
+      sidebar.classList.toggle('collapsed');
+      sidebarToggleBtn.classList.toggle('collapsed');
+    });
+  }
+
+  function switchView(viewId) {
+    // Update nav links active state
+    navLinks.forEach(link => {
+      if (link.getAttribute('data-target') === viewId) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+
+    // Update view visibility
+    viewSections.forEach(section => {
+      if (section.id === viewId) {
+        section.classList.add('active');
+      } else {
+        section.classList.remove('active');
+      }
+    });
   }
 
   // --- Real-time Listeners ---
@@ -149,6 +223,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
       });
       renderMessages();
+      
+      // Update Home stat
+      statMessagesCount.textContent = messages.length;
     }, (error) => {
       console.error("Messages Sync Error: ", error);
       showToast("فشل الاتصال بقاعدة بيانات الرسائل.", "danger");
@@ -182,7 +259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
           <td><span class="badge-role ${roleClass}">${roleLabel}</span></td>
           <td>
             <button 
-              class="btn-delete-user" 
+              class="btn-action-sm" 
               onclick="deleteUser('${id}')" 
               ${disabledAttr} 
               title="${titleAttr}"
@@ -199,9 +276,103 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  function formatWhatsAppNumber(phoneStr) {
+    if (!phoneStr) return '';
+    let cleaned = phoneStr.trim().replace(/[\s\-\(\)]/g, '');
+    if (cleaned.startsWith('+')) {
+      cleaned = cleaned.substring(1);
+    }
+    // Egyptian number logic: if starts with 01 (e.g. 01012345678), prepend country code 20 -> 201012345678
+    if (/^01[0-2,5]\d{8}$/.test(cleaned)) {
+      cleaned = '20' + cleaned.substring(1);
+    } else if (cleaned.startsWith('0')) {
+      cleaned = '20' + cleaned.substring(1);
+    }
+    return cleaned;
+  }
+
+  function setupTeamRealtimeListener() {
+    if (unsubscribeTeam) unsubscribeTeam();
+
+    const teamQ = query(teamCol, orderBy("createdAt", "desc"));
+
+    unsubscribeTeam = onSnapshot(teamQ, (snapshot) => {
+      teamTableBody.innerHTML = '';
+      teamMembers = [];
+
+      snapshot.forEach((docSnap) => {
+        const t = docSnap.data();
+        teamMembers.push({ id: docSnap.id, ...t });
+        
+        const row = document.createElement('tr');
+        
+        // Map rank to badge class
+        let badgeClass = 'user';
+        if (t.rank === 'Owner') badgeClass = 'owner';
+        if (t.rank === 'Manager') badgeClass = 'manager';
+        if (t.rank === 'Team Leader') badgeClass = 'teamleader';
+        if (t.rank === 'Organizer') badgeClass = 'organizer';
+
+        const rawPhone = t.phone || '-';
+        const waFormatted = formatWhatsAppNumber(t.phone);
+        const paymentMeth = t.paymentMethod || '-';
+        const paymentAcc = t.paymentAccount || '-';
+
+        const whatsappButton = waFormatted ? `
+          <a 
+            href="https://wa.me/${waFormatted}" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            class="btn-whatsapp" 
+            title="محادثة عبر الواتساب"
+          >
+            <i class="fa-brands fa-whatsapp"></i>
+            واتساب
+          </a>
+        ` : '';
+
+        row.innerHTML = `
+          <td><strong>${escapeHTML(t.name)}</strong></td>
+          <td style="font-family: monospace; letter-spacing: 1px;">${escapeHTML(t.code || '-')}</td>
+          <td><span class="badge-role ${badgeClass}">${escapeHTML(t.rank || '-')}</span></td>
+          <td dir="ltr" style="text-align: right;">${escapeHTML(rawPhone)}</td>
+          <td><span class="badge-payment">${escapeHTML(paymentMeth)}</span></td>
+          <td>${escapeHTML(paymentAcc)}</td>
+          <td>
+            <div class="table-actions">
+              ${whatsappButton}
+              <button 
+                class="btn-action-sm" 
+                onclick="deleteTeamMember('${docSnap.id}')" 
+                title="إزالة العضو من الفريق"
+              >
+                <i class="fa-solid fa-user-xmark"></i>
+                حذف
+              </button>
+            </div>
+          </td>
+        `;
+        teamTableBody.appendChild(row);
+      });
+
+      if (teamMembers.length === 0) {
+        teamEmptyState.style.display = 'flex';
+        teamTableBody.parentElement.style.display = 'none';
+      } else {
+        teamEmptyState.style.display = 'none';
+        teamTableBody.parentElement.style.display = 'table';
+      }
+
+      // Update Home stat
+      statTeamCount.textContent = teamMembers.length;
+
+    }, (error) => {
+      console.error("Team Sync Error: ", error);
+    });
+  }
+
   // --- Auth Handlers ---
 
-  // Handle Login submission
   loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = loginUsernameInput.value.trim();
@@ -234,17 +405,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Handle Logout button
   document.getElementById('logout-btn').addEventListener('click', () => {
     if (unsubscribeUsers) unsubscribeUsers();
     if (unsubscribeMessages) unsubscribeMessages();
+    if (unsubscribeTeam) unsubscribeTeam();
     sessionStorage.removeItem('fd_user');
-    window.location.reload(); // Full reload to reset memory states and show login cleanly
+    window.location.reload(); 
   });
 
-  // --- Admin operations ---
+  // --- Admin User Operations ---
 
-  // Handle Add User Form Submission
   addUserForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = adminUsernameInput.value.trim();
@@ -257,7 +427,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-      // Check if username exists
       const checkQuery = query(usersCol, where("username", "==", username));
       const checkSnapshot = await getDocs(checkQuery);
       
@@ -266,7 +435,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Add document
       await addDoc(usersCol, {
         username: username,
         password: password,
@@ -282,7 +450,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Handle User Deletion (Expose to window)
   window.deleteUser = async function(id) {
     try {
       const docRef = doc(db, "users", id);
@@ -310,9 +477,84 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
+  // --- Team Management Operations ---
+
+  async function getNextTeamCode() {
+    try {
+      const snapshot = await getDocs(teamCol);
+      let maxNum = 0;
+
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.code) {
+          const match = data.code.match(/4D-(\d+)/i);
+          if (match && match[1]) {
+            const num = parseInt(match[1], 10);
+            if (!isNaN(num) && num > maxNum) {
+              maxNum = num;
+            }
+          }
+        }
+      });
+
+      const nextNum = maxNum + 1;
+      return `4D-${nextNum}`;
+    } catch (err) {
+      console.error("Error calculating sequential team code:", err);
+      return `4D-1`;
+    }
+  }
+
+  addTeamForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = teamMemberName.value.trim();
+    const rank = teamMemberRank.value;
+    const phone = teamMemberPhone.value.trim();
+    const paymentMethod = teamMemberPaymentMethod.value;
+    const paymentAccount = teamMemberPaymentAccount.value.trim();
+
+    if (!name || !rank || !phone || !paymentMethod || !paymentAccount) {
+      showToast("يرجى ملء جميع البيانات المطلوبة لعضو الفريق.", "danger");
+      return;
+    }
+
+    // Auto-generate sequential code: 4D-1, 4D-2, etc.
+    const generatedCode = await getNextTeamCode();
+
+    try {
+      await addDoc(teamCol, {
+        name: name,
+        rank: rank,
+        phone: phone,
+        paymentMethod: paymentMethod,
+        paymentAccount: paymentAccount,
+        code: generatedCode,
+        createdAt: serverTimestamp()
+      });
+
+      showToast(`تم إضافة العضو "${name}" بنجاح بالكود ${generatedCode}`, "success");
+      addTeamForm.reset();
+    } catch (err) {
+      console.error("Error adding team member:", err);
+      showToast("فشل في إضافة عضو الفريق.", "danger");
+    }
+  });
+
+  window.deleteTeamMember = async function(id) {
+    if (confirm(`هل أنت متأكد من إزالة هذا العضو من الفريق؟`)) {
+      try {
+        await deleteDoc(doc(db, "team_members", id));
+        showToast(`تم حذف العضو من الفريق.`, "success");
+      } catch (err) {
+        console.error("Error deleting team member:", err);
+        showToast("فشل في حذف العضو.", "danger");
+      }
+    }
+  };
+
+
   // --- Message operations ---
 
-  // Handle New Message Submission
   messageForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -327,15 +569,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     await addMessage(title, content, pinned);
     
-    // Reset Form
     messageForm.reset();
     updateTextareaCounters();
   });
 
-  // Real-time Textarea counter
   textInput.addEventListener('input', updateTextareaCounters);
 
-  // Real-time Search input
   searchInput.addEventListener('input', () => {
     searchQuery = searchInput.value.trim().toLowerCase();
     
@@ -348,7 +587,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMessages();
   });
 
-  // Clear Search button
   clearSearchBtn.addEventListener('click', () => {
     searchInput.value = '';
     searchQuery = '';
@@ -357,7 +595,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMessages();
   });
 
-  // Filter Tabs
   tabAll.addEventListener('click', () => {
     setActiveTab(tabAll, 'all');
   });
@@ -366,9 +603,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     setActiveTab(tabPinned, 'pinned');
   });
 
-  /**
-   * Set active tab filter
-   */
   function setActiveTab(activeTabEl, filterType) {
     document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
     activeTabEl.classList.add('active');
@@ -376,9 +610,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     renderMessages();
   }
 
-  /**
-   * Update character and word counts for textarea
-   */
   function updateTextareaCounters() {
     const text = textInput.value;
     const charCount = text.length;
@@ -386,9 +617,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     charCountEl.textContent = `${charCount} حرف | ${wordCount} كلمة`;
   }
 
-  /**
-   * Initialize default admin credentials if users collection is empty
-   */
   async function initializeDefaultAdmin() {
     try {
       const snapshot = await getDocs(usersCol);
@@ -406,9 +634,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  /**
-   * Add message to Firestore
-   */
   async function addMessage(title, content, pinned) {
     try {
       await addDoc(messagesCol, {
@@ -424,16 +649,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  /**
-   * Delete message by ID (Expose to window)
-   */
   window.deleteMessage = function(id) {
     const message = messages.find(m => m.id === id);
     if (!message) return;
 
     const messageTitle = message.title;
     
-    // Add visual fade-out
     const cardEl = document.querySelector(`.message-card[data-id="${id}"]`);
     if (cardEl) {
       cardEl.style.opacity = '0';
@@ -457,9 +678,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 300);
   };
 
-  /**
-   * Toggle pin state of a message (Expose to window)
-   */
   window.togglePin = async function(id) {
     const message = messages.find(m => m.id === id);
     if (!message) return;
@@ -477,19 +695,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  /**
-   * Copy message text content with fallback (Expose to window)
-   */
   window.copyMessageText = async function(id, buttonEl) {
     const message = messages.find(m => m.id === id);
     if (!message) return;
 
     try {
-      // Modern Clipboard API
       await navigator.clipboard.writeText(message.content);
       applyCopyFeedback(buttonEl, message.title);
     } catch (err) {
-      // Fallback
       const textarea = document.createElement('textarea');
       textarea.value = message.content;
       textarea.style.position = 'fixed';
@@ -526,18 +739,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 1500);
   }
 
-  /**
-   * Render message cards to the dashboard grid
-   */
   function renderMessages() {
-    // 1. Filter Messages
     let filtered = messages.filter(msg => {
-      // Filter tabs
       if (currentFilter === 'pinned' && !msg.pinned) {
         return false;
       }
       
-      // Match query
       if (searchQuery) {
         const titleMatch = msg.title.toLowerCase().includes(searchQuery);
         const contentMatch = msg.content.toLowerCase().includes(searchQuery);
@@ -547,20 +754,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       return true;
     });
 
-    // 2. Sort Messages: Pinned first, then newest first
     filtered.sort((a, b) => {
       if (a.pinned && !b.pinned) return -1;
       if (!a.pinned && b.pinned) return 1;
       return new Date(b.createdAt) - new Date(a.createdAt);
     });
 
-    // 3. Clear Grid
     const existingCards = messagesGrid.querySelectorAll('.message-card');
     existingCards.forEach(card => card.remove());
 
     messagesCountBadge.textContent = filtered.length;
 
-    // 4. Check if empty
     if (filtered.length === 0) {
       emptyState.style.display = 'flex';
       
@@ -580,7 +784,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     } else {
       emptyState.style.display = 'none';
 
-      // 5. Inject cards
       filtered.forEach(msg => {
         const card = document.createElement('article');
         card.className = `message-card ${msg.pinned ? 'pinned' : ''}`;
@@ -624,9 +827,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  /**
-   * Escape HTML to prevent XSS
-   */
   function escapeHTML(str) {
     return str
       .replace(/&/g, '&amp;')
@@ -636,9 +836,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       .replace(/'/g, '&#039;');
   }
 
-  /**
-   * Display RTL toast notifications
-   */
   function showToast(message, type = 'info') {
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
@@ -670,7 +867,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function removeToast(toastEl) {
     toastEl.style.opacity = '0';
-    // Translate left on desktop and right/left on mobile depending on slide animations
     const width = window.innerWidth;
     if (width >= 600) {
       toastEl.style.transform = 'translateX(100%)';
