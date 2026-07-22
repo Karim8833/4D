@@ -45,13 +45,18 @@
   scrollbar-color: var(--accent-mustard) var(--bg-card);
 }
 
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 body {
   background-color: var(--bg-dark);
   color: var(--text-primary);
   line-height: 1.6;
   direction: rtl;
   text-align: right;
-  overflow-x: hidden;
 }
 
 /* Custom Scrollbars */
@@ -735,10 +740,13 @@ body {
   transform: translateY(0);
 }
 
-/* User management Table styles */
+/* User management & Team Table styles */
 .table-responsive {
   width: 100%;
+  max-width: 100%;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  display: block;
 }
 
 .users-table {
@@ -754,6 +762,7 @@ body {
   font-weight: 700;
   padding: 15px;
   border-bottom: 2px solid rgba(228, 179, 99, 0.2);
+  white-space: nowrap;
 }
 
 .users-table td {
@@ -761,6 +770,7 @@ body {
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   color: var(--text-secondary);
   vertical-align: middle;
+  white-space: nowrap;
 }
 
 .users-table tr:hover td {
@@ -1265,7 +1275,7 @@ body {
 /* Mobile-First Responsiveness (@media max-width: 768px) */
 @media (max-width: 768px) {
   .sidebar-toggle-btn {
-    display: none !important; /* Hide desktop collapse toggle on mobile */
+    display: none !important; /* Absolutely hide desktop collapse arrow on mobile */
   }
 
   .mobile-menu-btn {
@@ -1275,32 +1285,39 @@ body {
   }
 
   .sidebar-close-btn {
-    display: flex;
+    display: flex !important;
     align-items: center;
     justify-content: center;
   }
 
   .sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    width: 280px;
-    height: 100vh;
-    z-index: 9999;
-    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
-    transform: translateX(100%); /* Completely hidden off-screen to the right in RTL */
-    margin-right: 0 !important; /* Reset desktop collapse margin */
+    position: fixed !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    height: 100vh !important;
+    height: 100dvh !important;
+    width: 260px !important;
+    z-index: 99999 !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.8);
+    transform: translateX(100%); /* Hidden off-screen right in RTL */
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   .sidebar.active {
-    transform: translateX(0); /* Floats over main content */
+    transform: translateX(0) !important; /* Full height side drawer */
   }
 
   .main-content {
-    width: 100%;
-    min-width: 100%;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+  }
+
+  .views-container {
+    padding: 15px;
   }
 
   .header-content {
