@@ -1369,4 +1369,41 @@ body {
     max-width: 100%;
     margin-top: 15px;
   }
+
+  /* Emergency Mobile Banner Fix */
+  .welcome-banner, .hero-card {
+    height: auto !important;
+    min-height: 120px !important;
+    max-height: 180px !important; /* Prevents vertical stretching on mobile */
+    padding: 20px !important;
+    position: relative !important;
+    overflow: hidden !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    margin-bottom: 20px !important;
+  }
+
+  .welcome-banner h1, .welcome-banner p, .hero-card h1, .hero-card p {
+    position: relative !important;
+    z-index: 2 !important;
+    margin: 5px 0 !important;
+  }
+
+  .welcome-banner svg, .hero-card svg {
+    display: none !important;
+  }
+
+  .banner-watermark {
+    position: absolute !important;
+    top: 50% !important;
+    left: 5% !important;
+    transform: translateY(-50%) !important;
+    height: 100px !important;
+    max-width: 40% !important;
+    object-fit: contain !important;
+    opacity: 0.1 !important;
+    pointer-events: none !important;
+    z-index: 0 !important;
+  }
 }
