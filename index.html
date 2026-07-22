@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -9,10 +10,12 @@
   <!-- Google Fonts: Cairo (Arabic) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
   <!-- ==================== 1. LOGIN SCREEN ==================== -->
@@ -23,38 +26,26 @@
         <h1>فور <span class="brand-accent">دايركشنز</span></h1>
         <p class="login-subtitle">خزنة الرسائل الرقمية</p>
       </div>
-      
+
       <form id="login-form" class="login-form">
         <div class="form-group">
           <label for="login-username" class="form-label">اسم المستخدم</label>
           <div class="input-icon-wrapper">
-            <input 
-              type="text" 
-              id="login-username" 
-              class="form-input" 
-              placeholder="مثال: admin" 
-              required
-              autocomplete="username"
-            >
+            <input type="text" id="login-username" class="form-input" placeholder="مثال: admin" required
+              autocomplete="username">
             <span class="input-icon"><i class="fa-solid fa-user"></i></span>
           </div>
         </div>
-        
+
         <div class="form-group">
           <label for="login-password" class="form-label">كلمة المرور</label>
           <div class="input-icon-wrapper">
-            <input 
-              type="password" 
-              id="login-password" 
-              class="form-input" 
-              placeholder="••••••••" 
-              required
-              autocomplete="current-password"
-            >
+            <input type="password" id="login-password" class="form-input" placeholder="••••••••" required
+              autocomplete="current-password">
             <span class="input-icon"><i class="fa-solid fa-lock"></i></span>
           </div>
         </div>
-        
+
         <button type="submit" class="btn-primary" id="login-btn">
           <i class="fa-solid fa-right-to-bracket"></i>
           تسجيل الدخول
@@ -65,9 +56,9 @@
 
   <!-- ==================== 2. MAIN APPLICATION CONTENT ==================== -->
   <div id="app-wrapper" class="app-wrapper" style="display: none;">
-    
+
     <div class="dashboard-layout">
-      
+
       <!-- ==================== SIDEBAR ==================== -->
       <aside class="sidebar" id="main-sidebar">
         <div class="sidebar-brand">
@@ -78,7 +69,7 @@
             <i class="fa-solid fa-xmark"></i>
           </button>
         </div>
-        
+
         <nav class="sidebar-nav">
           <ul class="nav-list">
             <li class="nav-item">
@@ -101,7 +92,7 @@
               </a>
             </li>
           </ul>
-          
+
           <ul class="nav-list nav-list-bottom">
             <li class="nav-item admin-only" style="display: none;">
               <a href="#" class="nav-link" data-target="settings-view">
@@ -118,17 +109,18 @@
 
       <!-- ==================== MAIN CONTENT AREA ==================== -->
       <main class="main-content">
-        
+
         <!-- Sticky Header -->
         <header class="main-header">
           <div class="header-content">
-            
+
             <div class="header-controls">
               <!-- Sidebar Collapse Toggle Button -->
-              <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="طي/توسيع القائمة الجانبية" aria-label="Toggle Sidebar">
+              <button id="sidebar-toggle-btn" class="sidebar-toggle-btn" title="طي/توسيع القائمة الجانبية"
+                aria-label="Toggle Sidebar">
                 <i class="fa-solid fa-chevron-right"></i>
               </button>
-              
+
               <!-- Mobile Menu Toggle -->
               <button id="mobile-menu-btn" class="mobile-menu-btn" aria-label="Toggle Menu">
                 <i class="fa-solid fa-bars"></i>
@@ -137,14 +129,8 @@
 
             <!-- Search Bar -->
             <div class="search-wrapper">
-              <input 
-                type="text" 
-                id="search-input" 
-                class="search-input" 
-                placeholder="ابحث في العناوين أو المحتويات..." 
-                aria-label="بحث في الرسائل"
-                autocomplete="off"
-              >
+              <input type="text" id="search-input" class="search-input" placeholder="ابحث في العناوين أو المحتويات..."
+                aria-label="بحث في الرسائل" autocomplete="off">
               <button id="clear-search" class="clear-search-btn" title="مسح البحث">
                 <i class="fa-solid fa-xmark"></i>
               </button>
@@ -167,12 +153,12 @@
 
         <!-- Main Views Container -->
         <div class="views-container">
-          
+
           <!-- ========== 1. HOME VIEW ========== -->
           <section id="home-view" class="view-section active">
             <div class="welcome-banner hero-card">
-              <h1 id="hero-greeting" class="hero-title">أهلاً يا <span id="hero-username">مستخدم</span> 👋</h1>
-              <p class="hero-slogan">With you through the journey</p>
+              <h1 id="hero-greeting" class="hero-title">أهلاً يا <span id="hero-username">مستخدم</span> 🎉</h1>
+              <p class="hero-slogan">جاهز للشغل يا بطل 🎊🎉</p>
             </div>
             <div class="stats-grid" id="home-stats" style="display: none;">
               <div class="stat-card">
@@ -195,33 +181,24 @@
           <!-- ========== 2. VAULT VIEW ========== -->
           <section id="vault-view" class="view-section">
             <div class="dashboard-grid">
-              
+
               <!-- Right Panel: Message Creation Form -->
               <section class="vault-panel" aria-labelledby="form-panel-title">
                 <h2 id="form-panel-title" class="panel-title">إنشاء رسالة</h2>
-                
+
                 <form id="message-form" novalidate>
                   <div class="form-group">
                     <label for="message-title" class="form-label">عنوان الرسالة</label>
-                    <input 
-                      type="text" 
-                      id="message-title" 
-                      class="form-input" 
-                      placeholder="مثال: عرض الخصم للمتابعة" 
-                      required
-                      maxlength="80"
-                    >
+                    <input type="text" id="message-title" class="form-input" placeholder="مثال: عرض الخصم للمتابعة"
+                      required maxlength="80">
                   </div>
 
                   <div class="form-group">
                     <label for="message-text" class="form-label">رسالة الواتساب</label>
-                    <textarea 
-                      id="message-text" 
-                      class="form-textarea" 
-                      placeholder="اكتب أو الصق رسالتك هنا تماماً كما تريد أن تظهر على الواتساب. يتم حفظ الأسطر الجديدة والمسافات والرموز التعبيرية 🚀 تلقائياً." 
-                      required
-                    ></textarea>
-                    
+                    <textarea id="message-text" class="form-textarea"
+                      placeholder="اكتب أو الصق رسالتك هنا تماماً كما تريد أن تظهر على الواتساب. يتم حفظ الأسطر الجديدة والمسافات والرموز التعبيرية 🚀 تلقائياً."
+                      required></textarea>
+
                     <div class="form-row-meta">
                       <span>الرموز التعبيرية والتنسيق محفوظان</span>
                       <span id="char-count">0 حرف | 0 كلمة</span>
@@ -248,7 +225,7 @@
                     <h2 id="feed-panel-title" class="feed-title">مخزن الرسائل</h2>
                     <span id="messages-count" class="feed-count">0</span>
                   </div>
-                  
+
                   <nav class="filter-tabs" aria-label="ألسنة تصفية الرسائل">
                     <button id="filter-all" class="tab-btn active" data-filter="all">الكل</button>
                     <button id="filter-pinned" class="tab-btn" data-filter="pinned">
@@ -272,24 +249,18 @@
           <!-- ========== 3. TEAM VIEW (Admin Only) ========== -->
           <section id="team-view" class="view-section admin-only">
             <h2 class="panel-title">إدارة فريق العمل</h2>
-            
+
             <div class="dashboard-grid">
-              
+
               <!-- Form Panel -->
               <section class="vault-panel">
                 <h3 class="admin-subtitle">إضافة عضو جديد</h3>
                 <form id="add-team-form" novalidate>
                   <div class="form-group">
                     <label for="team-member-name" class="form-label">اسم العضو</label>
-                    <input 
-                      type="text" 
-                      id="team-member-name" 
-                      class="form-input" 
-                      placeholder="أدخل اسم العضو" 
-                      required
-                    >
+                    <input type="text" id="team-member-name" class="form-input" placeholder="أدخل اسم العضو" required>
                   </div>
-                  
+
                   <div class="form-group">
                     <label for="team-member-rank" class="form-label">الرتبة / الدور</label>
                     <select id="team-member-rank" class="form-select" required>
@@ -303,13 +274,8 @@
 
                   <div class="form-group">
                     <label for="team-member-phone" class="form-label">رقم التليفون</label>
-                    <input 
-                      type="tel" 
-                      id="team-member-phone" 
-                      class="form-input" 
-                      placeholder="مثال: 01012345678" 
-                      required
-                    >
+                    <input type="tel" id="team-member-phone" class="form-input" placeholder="مثال: 01012345678"
+                      required>
                   </div>
 
                   <div class="form-group">
@@ -327,13 +293,8 @@
 
                   <div class="form-group">
                     <label for="team-member-payment-account" class="form-label">رقم/حساب الدفع</label>
-                    <input 
-                      type="text" 
-                      id="team-member-payment-account" 
-                      class="form-input" 
-                      placeholder="رقم المحفظة أو اسم حساب Instapay" 
-                      required
-                    >
+                    <input type="text" id="team-member-payment-account" class="form-input"
+                      placeholder="رقم المحفظة أو اسم حساب Instapay" required>
                   </div>
 
                   <button type="submit" class="btn-primary">
@@ -363,7 +324,7 @@
                       <!-- Team rows will be dynamically injected here -->
                     </tbody>
                   </table>
-                  
+
                   <div id="team-empty-state" class="empty-state" style="display: none; padding: 20px;">
                     <p class="empty-desc">لا يوجد أعضاء في الفريق حالياً.</p>
                   </div>
@@ -376,33 +337,21 @@
           <!-- ========== 4. SETTINGS VIEW (Admin Only) ========== -->
           <section id="settings-view" class="view-section admin-only">
             <h2 class="panel-title">لوحة التحكم للمسؤول (إدارة مستخدمي النظام)</h2>
-            
+
             <div class="dashboard-grid">
-              
+
               <!-- Add System User Form -->
               <section class="vault-panel">
                 <h3 class="admin-subtitle">إضافة مستخدم نظام جديد</h3>
                 <form id="add-user-form" novalidate>
                   <div class="form-group">
                     <label for="admin-username" class="form-label">اسم المستخدم الجديد</label>
-                    <input 
-                      type="text" 
-                      id="admin-username" 
-                      class="form-input" 
-                      placeholder="اسم المستخدم" 
-                      required
-                    >
+                    <input type="text" id="admin-username" class="form-input" placeholder="اسم المستخدم" required>
                   </div>
-                  
+
                   <div class="form-group">
                     <label for="admin-password" class="form-label">كلمة المرور</label>
-                    <input 
-                      type="password" 
-                      id="admin-password" 
-                      class="form-input" 
-                      placeholder="كلمة المرور" 
-                      required
-                    >
+                    <input type="password" id="admin-password" class="form-input" placeholder="كلمة المرور" required>
                   </div>
 
                   <div class="form-group">
@@ -444,7 +393,7 @@
 
         </div>
       </main>
-      
+
     </div>
   </div>
 
@@ -454,4 +403,5 @@
   <!-- Client-Side Javascript Logic -->
   <script type="module" src="script.js"></script>
 </body>
+
 </html>
