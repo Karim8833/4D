@@ -1370,11 +1370,11 @@ body {
     margin-top: 15px;
   }
 
-  /* Emergency Mobile Banner Fix */
+  /* Force exact banner height and prevent stretching */
   .welcome-banner, .hero-card {
-    height: auto !important;
-    min-height: 120px !important;
-    max-height: 180px !important; /* Prevents vertical stretching on mobile */
+    height: 160px !important;
+    min-height: 160px !important;
+    max-height: 160px !important;
     padding: 20px !important;
     position: relative !important;
     overflow: hidden !important;
@@ -1384,9 +1384,11 @@ body {
     margin-bottom: 20px !important;
   }
 
-  .welcome-banner h1, .welcome-banner p, .hero-card h1, .hero-card p {
+  /* Ensure text stays on top */
+  .welcome-banner h1, .welcome-banner p, 
+  .hero-card h1, .hero-card p {
     position: relative !important;
-    z-index: 2 !important;
+    z-index: 5 !important;
     margin: 5px 0 !important;
   }
 
@@ -1394,16 +1396,16 @@ body {
     display: none !important;
   }
 
+  /* Style the logo watermark perfectly */
   .banner-watermark {
     position: absolute !important;
     top: 50% !important;
-    left: 5% !important;
+    left: -10px !important;
     transform: translateY(-50%) !important;
-    height: 100px !important;
-    max-width: 40% !important;
-    object-fit: contain !important;
+    height: 130px !important;
+    width: auto !important;
     opacity: 0.1 !important;
     pointer-events: none !important;
-    z-index: 0 !important;
+    z-index: 1 !important;
   }
 }
