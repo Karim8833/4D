@@ -142,6 +142,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('app-wrapper').style.display = 'block';
     document.getElementById('user-display-name').textContent = username;
     
+    // Inject dynamic hero greeting
+    const heroGreeting = document.getElementById('hero-greeting');
+    if (heroGreeting) {
+      heroGreeting.innerHTML = `أهلاً يا <span class="brand-accent">${escapeHTML(username)}</span> 👋`;
+    }
+    
     // RBAC: Toggle Admin-only elements
     if (role === 'admin') {
       adminOnlyElements.forEach(el => el.style.display = '');
