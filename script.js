@@ -54,7 +54,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const viewSections = document.querySelectorAll('.view-section');
   const adminOnlyElements = document.querySelectorAll('.admin-only');
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const sidebarCloseBtn = document.getElementById('sidebar-close-btn');
   const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
   const sidebar = document.getElementById('main-sidebar');
 
   // DOM Elements - Home Stats
@@ -157,7 +159,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     switchView('home-view');
   }
 
-  // --- Navigation & Layout ---
+  // Open & Close Mobile Sidebar Functions
+  function openMobileSidebar() {
+    sidebar.classList.add('active');
+    if (sidebarOverlay) sidebarOverlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileSidebar() {
+    sidebar.classList.remove('active');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
 
   navLinks.forEach(link => {
     link.addEventListener('click', (e) => {
@@ -167,14 +180,22 @@ document.addEventListener('DOMContentLoaded', async () => {
       
       // Close sidebar on mobile after clicking
       if (window.innerWidth <= 768) {
-        sidebar.classList.remove('active');
+        closeMobileSidebar();
       }
     });
   });
 
-  mobileMenuBtn.addEventListener('click', () => {
-    sidebar.classList.toggle('active');
-  });
+  if (mobileMenuBtn) {
+    mobileMenuBtn.addEventListener('click', openMobileSidebar);
+  }
+
+  if (sidebarCloseBtn) {
+    sidebarCloseBtn.addEventListener('click', closeMobileSidebar);
+  }
+
+  if (sidebarOverlay) {
+    sidebarOverlay.addEventListener('click', closeMobileSidebar);
+  }
 
   if (sidebarToggleBtn) {
     sidebarToggleBtn.addEventListener('click', () => {

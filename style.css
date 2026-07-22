@@ -1224,20 +1224,83 @@ body {
   100% { transform: translateY(0px); }
 }
 
-/* Mobile Responsiveness for Sidebar & Layout */
+/* Mobile-Only Sidebar Close Button */
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 6px;
+  margin-right: auto; /* Pushes to left of brand header in RTL */
+  transition: var(--transition-smooth);
+}
+
+.sidebar-close-btn:hover {
+  color: #ff5252;
+}
+
+/* Mobile Sidebar Overlay Backdrop */
+.sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+}
+
+.sidebar-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Mobile-First Responsiveness (@media max-width: 768px) */
 @media (max-width: 768px) {
-  .sidebar {
-    position: fixed;
-    transform: translateX(100%); /* RTL hidden to the right */
-    box-shadow: 0 0 50px rgba(0,0,0,0.8);
-  }
-  
-  .sidebar.active {
-    transform: translateX(0);
+  .sidebar-toggle-btn {
+    display: none !important; /* Hide desktop collapse toggle on mobile */
   }
 
   .mobile-menu-btn {
-    display: block;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 280px;
+    height: 100vh;
+    z-index: 9999;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.7);
+    transform: translateX(100%); /* Completely hidden off-screen to the right in RTL */
+    margin-right: 0 !important; /* Reset desktop collapse margin */
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .sidebar.active {
+    transform: translateX(0); /* Floats over main content */
+  }
+
+  .main-content {
+    width: 100%;
+    min-width: 100%;
   }
 
   .header-content {
