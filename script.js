@@ -1510,20 +1510,20 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const isPaid = settlementsMap[`${monthKey}_${memberId}`]?.paid || false;
-    const statusText = isPaid ? 'تم السداد بالكامل ✓' : 'قيد المراجعة والتحويل';
+    const statusText = isPaid ? 'تم&nbsp;سداد&nbsp;المستحقات&nbsp;بالكامل&nbsp;✓' : 'قيد&nbsp;المراجعة&nbsp;والتحويل';
     const statusColor = isPaid ? '#155724' : '#856404';
     const statusBg = isPaid ? '#d4edda' : '#fff3cd';
 
     const nowFormatted = new Date().toLocaleDateString('ar-EG', {
       year: 'numeric', month: 'long', day: 'numeric'
-    });
+    }).replace(/\s+/g, '&nbsp;');
 
-    const memberName = escapeHTML(member.name || '—');
+    const memberName = escapeHTML(member.name || '—').replace(/\s+/g, '&nbsp;');
     const memberCode = escapeHTML(member.code || '—');
-    const memberRank = escapeHTML(member.rank || '—');
-    const memberPayMethod = escapeHTML(member.paymentMethod || '—');
+    const memberRank = escapeHTML(member.rank || '—').replace(/\s+/g, '&nbsp;');
+    const memberPayMethod = escapeHTML(member.paymentMethod || '—').replace(/\s+/g, '&nbsp;');
     const memberPayAccount = escapeHTML(member.paymentAccount || '—');
-    const monthName = getArabicMonthName(monthKey);
+    const monthName = getArabicMonthName(monthKey).replace(/\s+/g, '&nbsp;');
 
     pdfContentContainer.innerHTML = `
       <div dir="rtl" style="
@@ -1546,16 +1546,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <img src="logo.png" alt="4Directions" style="height:56px; width:auto; display:block;">
                   </td>
                   <td valign="middle" align="right" style="vertical-align:middle; text-align:right;">
-                    <div style="font-size:22px; font-weight:900; color:#121212; line-height:1.2;">فور <span style="color:#d7b704;">دايركشنز</span></div>
+                    <div style="font-size:22px; font-weight:900; color:#121212; line-height:1.2;">فور&nbsp;<span style="color:#d7b704;">دايركشنز</span></div>
                     <div style="font-size:10px; color:#888888; margin-top:3px;">4Directions Event Organizers Management</div>
                   </td>
                 </tr>
               </table>
             </td>
             <td align="left" valign="middle" style="width:50%; text-align:left; vertical-align:middle; direction:ltr;">
-              <div style="font-size:18px; font-weight:900; color:#1a1a1a; text-align:right; direction:rtl; line-height:1.3;">كشف حساب مستحقات مالية</div>
-              <div style="font-size:12px; color:#555555; margin-top:5px; text-align:right; direction:rtl;">شهر: <strong style="color:#121212;">${monthName}</strong></div>
-              <div style="font-size:11px; color:#888888; margin-top:3px; text-align:right; direction:rtl;">تاريخ الإصدار: ${nowFormatted}</div>
+              <div style="font-size:18px; font-weight:900; color:#1a1a1a; text-align:right; direction:rtl; line-height:1.3;">كشف&nbsp;حساب&nbsp;مستحقات&nbsp;مالية</div>
+              <div style="font-size:12px; color:#555555; margin-top:5px; text-align:right; direction:rtl;">شهر:&nbsp;<strong style="color:#121212;">${monthName}</strong></div>
+              <div style="font-size:11px; color:#888888; margin-top:3px; text-align:right; direction:rtl;">تاريخ&nbsp;الإصدار:&nbsp;${nowFormatted}</div>
             </td>
           </tr>
         </table>
@@ -1568,15 +1568,15 @@ document.addEventListener('DOMContentLoaded', async () => {
           <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse;">
             <tr>
               <td valign="top" style="width:33.33%; padding:6px 10px 6px 0; vertical-align:top; text-align:right;">
-                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">اسم العضو</div>
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">اسم&nbsp;العضو</div>
                 <div style="font-size:14px; font-weight:800; color:#121212;">${memberName}</div>
               </td>
               <td valign="top" style="width:33.33%; padding:6px 10px; vertical-align:top; text-align:right; border-right:2px solid #e0e0e0;">
-                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">الكود / الرتبة</div>
-                <div style="font-size:14px; font-weight:800; color:#121212;">${memberCode} &nbsp;—&nbsp; ${memberRank}</div>
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">الكود&nbsp;/&nbsp;الرتبة</div>
+                <div style="font-size:14px; font-weight:800; color:#121212;">${memberCode}&nbsp;&nbsp;—&nbsp;&nbsp;${memberRank}</div>
               </td>
               <td valign="top" style="width:33.33%; padding:6px 0 6px 10px; vertical-align:top; text-align:right; border-right:2px solid #e0e0e0;">
-                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">حالة السداد</div>
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">حالة&nbsp;السداد</div>
                 <div style="font-size:12px; font-weight:800; color:${statusColor}; background:${statusBg}; display:inline-block; padding:3px 10px; border-radius:4px;">${statusText}</div>
               </td>
             </tr>
@@ -1587,11 +1587,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             </tr>
             <tr>
               <td valign="top" style="width:33.33%; padding:10px 10px 6px 0; vertical-align:top; text-align:right;">
-                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">طريقة الدفع</div>
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">طريقة&nbsp;الدفع</div>
                 <div style="font-size:13px; font-weight:700; color:#121212;">${memberPayMethod}</div>
               </td>
               <td valign="top" colspan="2" style="width:66.66%; padding:10px 10px 6px; vertical-align:top; text-align:right; border-right:2px solid #e0e0e0;">
-                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">رقم الحساب / المحفظة</div>
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">رقم&nbsp;الحساب&nbsp;/&nbsp;المحفظة</div>
                 <div style="font-size:13px; font-weight:700; color:#121212; font-family:monospace;">${memberPayAccount}</div>
               </td>
             </tr>
@@ -1603,13 +1603,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           <thead>
             <tr style="background-color:#1a1a1a;">
               <th style="width:4%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">م</th>
-              <th style="width:28%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">اسم الفعالية / الحفلة</th>
+              <th style="width:28%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">اسم&nbsp;الفعالية&nbsp;/&nbsp;الحفلة</th>
               <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">التاريخ</th>
-              <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">الأجر الأساسي</th>
+              <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">الأجر&nbsp;الأساسي</th>
               <th style="width:9%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">البونص</th>
               <th style="width:9%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">الخصومات</th>
-              <th style="width:18%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">مهام إضافية</th>
-              <th style="width:10%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">صافي الحفلة</th>
+              <th style="width:18%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">مهام&nbsp;إضافية</th>
+              <th style="width:10%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">صافي&nbsp;الحفلة</th>
             </tr>
           </thead>
           <tbody>
@@ -1621,18 +1621,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-bottom:24px;">
           <tr>
             <td align="right" valign="top" style="width:55%; text-align:right; vertical-align:top; padding-left:20px;">
-              <div style="font-size:12px; font-weight:800; color:#333333; margin-bottom:10px;">ملخص العمليات الحسابية:</div>
+              <div style="font-size:12px; font-weight:800; color:#333333; margin-bottom:10px;">ملخص&nbsp;العمليات&nbsp;الحسابية:</div>
               <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; width:100%;">
                 <tr>
-                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">الأجور الأساسية</td>
+                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">الأجور&nbsp;الأساسية</td>
                   <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#121212; text-align:left; white-space:nowrap;">${sumBase}&nbsp;ج.م</td>
                 </tr>
                 <tr>
-                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">إجمالي البونص</td>
+                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">إجمالي&nbsp;البونص</td>
                   <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#1e7e34; text-align:left; white-space:nowrap;">+${sumBonus}&nbsp;ج.م</td>
                 </tr>
                 <tr>
-                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">المهام الإضافية</td>
+                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">المهام&nbsp;الإضافية</td>
                   <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#b8860b; text-align:left; white-space:nowrap;">+${sumExtra}&nbsp;ج.م</td>
                 </tr>
                 <tr>
@@ -1643,7 +1643,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                   <td colspan="2" style="padding-top:6px;"><div style="height:1px; background:#dddddd;"></div></td>
                 </tr>
                 <tr>
-                  <td style="padding:6px 0 0; font-size:11px; color:#555555; text-align:right;">إجمالي الفعاليات</td>
+                  <td style="padding:6px 0 0; font-size:11px; color:#555555; text-align:right;">إجمالي&nbsp;الفعاليات</td>
                   <td style="padding:6px 8px 0; font-size:11px; font-weight:700; color:#121212; text-align:left;">${attendedEvents.length}&nbsp;فعالية</td>
                 </tr>
               </table>
@@ -1652,7 +1652,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <table cellpadding="0" cellspacing="0" border="0" align="center" style="width:88%; margin:0 auto; background-color:#d7b704; border-radius:10px; border-collapse:separate; border:1px solid #c5a703;">
                 <tr>
                   <td align="center" valign="middle" style="padding:16px 12px 4px 12px; font-size:11px; font-weight:800; color:#111111; font-family:'Cairo',sans-serif; text-align:center; border:none;">
-                    الإجمالي النهائي المستحق
+                    الإجمالي&nbsp;النهائي&nbsp;المستحق
                   </td>
                 </tr>
                 <tr>
@@ -1668,8 +1668,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         <!-- ===== FOOTER ===== -->
         <div style="border-top:1px solid #e0e0e0; padding-top:14px; margin-top:8px; text-align:right; direction:rtl;">
           <span style="font-size:11px; color:#888888;">
-            <strong style="color:#555555;">ملاحظات الإدارة:</strong>
-            يتم تحويل المستحقات بناء على بيانات الدفع المسجلة أعلاه.
+            <strong style="color:#555555;">ملاحظات&nbsp;الإدارة:</strong>
+            يتم&nbsp;تحويل&nbsp;المستحقات&nbsp;بناءً&nbsp;على&nbsp;بيانات&nbsp;الدفع&nbsp;المسجلة&nbsp;أعلاه.
           </span>
         </div>
 
@@ -1683,7 +1683,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       html2canvas: {
         scale: 2,
         useCORS: true,
-        letterRendering: true,
         scrollY: 0,
         scrollX: 0,
         backgroundColor: '#ffffff'
