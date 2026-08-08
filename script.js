@@ -1436,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- Arabic PDF Statement Generation (Table-Based Layout, NO Flexbox/Grid, Robust RTL & Spacing) ---
+  // --- Arabic PDF Statement Generation (Table-Based Layout, NO Flexbox/Grid, Hardcoded &nbsp; RTL Spacing) ---
 
   window.generateMemberStatementPDF = function (memberId, monthKey) {
     const member = teamMembers.find(t => t.id === memberId);
@@ -1490,14 +1490,17 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (evt.extraTasks && evt.extraTasks.length > 0) {
         extraTasksString = evt.extraTasks.map(t => {
           sumExtra += (Number(t.amount) || 0);
-          return `${escapeHTML(t.description)}&nbsp;(${t.amount}&nbsp;ج.م)`;
+          const safeDesc = escapeHTML(t.description || '').replace(/\s+/g, '&nbsp;');
+          return `${safeDesc}&nbsp;(${t.amount}&nbsp;ج.م)`;
         }).join('&nbsp;+&nbsp;');
       }
+
+      const safeEventName = escapeHTML(evt.eventName || '').replace(/\s+/g, '&nbsp;');
 
       tableRowsHTML += `
         <tr style="page-break-inside: avoid; break-inside: avoid; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
           <td align="center" style="text-align: center; padding: 9px 4px; border: 1px solid #dcdcdc; font-size: 11px; color: #121212;">${idx + 1}</td>
-          <td align="right" style="text-align: right; padding: 9px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111;">${escapeHTML(evt.eventName)}</td>
+          <td align="right" style="text-align: right; padding: 9px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111;">${safeEventName}</td>
           <td align="center" style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #444444;">${escapeHTML(evt.eventDate)}</td>
           <td align="center" style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #121212;">${evt.baseRate}&nbsp;ج.م</td>
           <td align="center" style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700;">+${evt.bonus}&nbsp;ج.م</td>
@@ -1510,18 +1513,24 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const isPaid = settlementsMap[`${monthKey}_${memberId}`]?.paid || false;
     const paidBadgeHTML = isPaid
-      ? `<span style="color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">تم سداد المستحقات بالكامل ✓</span>`
-      : `<span style="color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">قيد المراجعة والتحويل</span>`;
+      ? `<span style="color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">تم&nbsp;سداد&nbsp;المستحقات&nbsp;بالكامل&nbsp;✓</span>`
+      : `<span style="color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">قيد&nbsp;المراجعة&nbsp;والتحويل</span>`;
 
     const nowFormatted = new Date().toLocaleDateString('ar-EG', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
-    });
+    }).replace(/\s+/g, '&nbsp;');
 
-    // Pure Table-Based Layout with Strict Border-Box & Margin Containment
+    const safeMemberName = escapeHTML(member.name || '').replace(/\s+/g, '&nbsp;');
+    const safeRank = escapeHTML(member.rank || '-').replace(/\s+/g, '&nbsp;');
+    const safePaymentMethod = escapeHTML(member.paymentMethod || '-').replace(/\s+/g, '&nbsp;');
+    const safePaymentAccount = escapeHTML(member.paymentAccount || '-').replace(/\s+/g, '&nbsp;');
+    const safeMonthName = getArabicMonthName(monthKey).replace(/\s+/g, '&nbsp;');
+
+    // Hardcoded HTML Template: Explicit &nbsp;, 100% box-sizing, and Strict Borderless 50/50 Footer Table
     pdfContentContainer.innerHTML = `
-      <div class="pdf-statement-page" dir="rtl" style="font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; border: 2px solid #1a1a1a; border-radius: 8px; padding: 20px 22px; background-color: #ffffff; color: #121212; width: 96%; max-width: 96%; margin: 0 auto; box-sizing: border-box;">
+      <div class="pdf-statement-page" dir="rtl" style="width: 100%; box-sizing: border-box; padding: 20px; border: 2px solid #333; font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; background-color: #ffffff; color: #121212;">
         
         <!-- 1. Header Table (Borderless) -->
         <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid;">
@@ -1533,21 +1542,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <img src="logo.png" alt="4Directions" width="55" height="55" style="width: 55px; height: 55px; display: block;">
                   </td>
                   <td valign="middle" align="right" style="vertical-align: middle; text-align: right;">
-                    <h1 style="margin: 0 0 2px 0; font-size: 21px; font-weight: 800; color: #121212; font-family: 'Cairo', sans-serif; line-height: 1.3;">فور <span style="color: #d7b704;">دايركشنز</span></h1>
-                    <p style="margin: 0; font-size: 10.5px; color: #666666; font-family: 'Cairo', sans-serif;">4Directions Event Organizers Management</p>
+                    <h1 style="margin: 0 0 2px 0; font-size: 21px; font-weight: 800; color: #121212; font-family: 'Cairo', sans-serif; line-height: 1.3;">فور&nbsp;<span style="color: #d7b704;">دايركشنز</span></h1>
+                    <p style="margin: 0; font-size: 10.5px; color: #666666; font-family: 'Cairo', sans-serif;">4Directions&nbsp;Event&nbsp;Organizers&nbsp;Management</p>
                   </td>
                 </tr>
               </table>
             </td>
             <td align="left" valign="middle" style="width: 40%; text-align: left; vertical-align: middle; direction: ltr;">
               <div style="background-color: #1a1a1a; color: #d7b704; font-size: 14px; font-weight: 800; padding: 5px 12px; border-radius: 4px; display: inline-block; font-family: 'Cairo', sans-serif; direction: rtl; text-align: center; margin-bottom: 5px;">
-                كشف حساب مستحقات مالية
+                كشف&nbsp;حساب&nbsp;مستحقات&nbsp;مالية
               </div>
               <p style="margin: 2px 0 0 0; font-size: 11.5px; color: #333333; font-family: 'Cairo', sans-serif; direction: rtl; text-align: left;">
-                عن شهر:&nbsp;<strong style="color: #121212;">${getArabicMonthName(monthKey)}</strong>
+                عن&nbsp;شهر:&nbsp;<strong style="color: #121212;">${safeMonthName}</strong>
               </p>
               <p style="margin: 2px 0 0 0; font-size: 10.5px; color: #777777; font-family: 'Cairo', sans-serif; direction: rtl; text-align: left;">
-                تاريخ الإصدار:&nbsp;${nowFormatted}
+                تاريخ&nbsp;الإصدار:&nbsp;${nowFormatted}
               </p>
             </td>
           </tr>
@@ -1557,29 +1566,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         <table dir="rtl" width="100%" border="0" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1px solid #e0e0e0; border-right: 4px solid #d7b704; border-radius: 6px; margin-bottom: 16px; font-family: 'Cairo', sans-serif; page-break-inside: avoid; break-inside: avoid;">
           <tr>
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">اسم العضو:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.name)}</p>
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">اسم&nbsp;العضو:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${safeMemberName}</p>
             </td>
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">الكود / المعرّف:</p>
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">الكود&nbsp;/&nbsp;المعرّف:</p>
               <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212; font-family: monospace;">${escapeHTML(member.code || '-')}</p>
             </td>
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">الرتبة في الفريق:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.rank || '-')}</p>
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">الرتبة&nbsp;في&nbsp;الفريق:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${safeRank}</p>
             </td>
           </tr>
           <tr>
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">طريقة الدفع المعتمدة:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.paymentMethod || '-')}</p>
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">طريقة&nbsp;الدفع&nbsp;المعتمدة:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${safePaymentMethod}</p>
             </td>
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">رقم الحساب / المحفظة:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.paymentAccount || '-')}</p>
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">رقم&nbsp;الحساب&nbsp;/&nbsp;المحفظة:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${safePaymentAccount}</p>
             </td>
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">حالة السداد:</p>
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">حالة&nbsp;السداد:</p>
               <div style="margin: 0;">${paidBadgeHTML}</div>
             </td>
           </tr>
@@ -1590,13 +1599,13 @@ document.addEventListener('DOMContentLoaded', async () => {
           <thead>
             <tr style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid; break-inside: avoid;">
               <th align="center" style="width: 5%; text-align: center; padding: 10px 4px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">م</th>
-              <th align="right" style="width: 31%; text-align: right; padding: 10px 8px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff;">اسم الفعالية / الحفلة</th>
+              <th align="right" style="width: 31%; text-align: right; padding: 10px 8px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff;">اسم&nbsp;الفعالية&nbsp;/&nbsp;الحفلة</th>
               <th align="center" style="width: 13%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">التاريخ</th>
-              <th align="center" style="width: 11%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">الأجر الأساسي</th>
+              <th align="center" style="width: 11%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">الأجر&nbsp;الأساسي</th>
               <th align="center" style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">البونص</th>
               <th align="center" style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">الخصومات</th>
-              <th align="right" style="width: 18%; text-align: right; padding: 10px 8px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">مهام إضافية</th>
-              <th align="center" style="width: 12%; text-align: center; padding: 10px 6px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff;">صافي الحفلة</th>
+              <th align="right" style="width: 18%; text-align: right; padding: 10px 8px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">مهام&nbsp;إضافية</th>
+              <th align="center" style="width: 12%; text-align: center; padding: 10px 6px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff;">صافي&nbsp;الحفلة</th>
             </tr>
           </thead>
           <tbody>
@@ -1608,33 +1617,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1.5px solid #1a1a1a; border-radius: 6px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
           <tr>
             <td align="right" valign="middle" style="width: 65%; padding: 14px 16px; text-align: right;">
-              <p style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #1a1a1a;">ملخص العمليات الحسابية:</p>
+              <p style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #1a1a1a;">ملخص&nbsp;العمليات&nbsp;الحسابية:</p>
               <p style="margin: 0 0 4px 0; font-size: 11.5px; color: #444444; line-height: 1.6;">
-                الأجور الأساسية (${sumBase}&nbsp;ج.م) + إجمالي البونص (${sumBonus}&nbsp;ج.م) + إضافي (${sumExtra}&nbsp;ج.م) - خصومات (${sumDeductions}&nbsp;ج.م)
+                الأجور&nbsp;الأساسية&nbsp;(${sumBase}&nbsp;ج.م)&nbsp;+&nbsp;إجمالي&nbsp;البونص&nbsp;(${sumBonus}&nbsp;ج.م)&nbsp;+&nbsp;إضافي&nbsp;(${sumExtra}&nbsp;ج.م)&nbsp;-&nbsp;خصومات&nbsp;(${sumDeductions}&nbsp;ج.م)
               </p>
               <p style="margin: 0; font-size: 11.5px; font-weight: 700; color: #b8860b;">
-                إجمالي عدد الفعاليات المنفذة:&nbsp;${attendedEvents.length}&nbsp;فعالية
+                إجمالي&nbsp;عدد&nbsp;الفعاليات&nbsp;المنفذة:&nbsp;${attendedEvents.length}&nbsp;فعالية
               </p>
             </td>
             <td align="center" valign="middle" style="width: 35%; padding: 14px 16px; background-color: #1a1a1a; color: #ffffff; text-align: center; border-right: 4px solid #d7b704; border-radius: 0 5px 5px 0;">
-              <p style="margin: 0 0 4px 0; font-size: 12px; color: #dddddd; font-family: 'Cairo', sans-serif;">الإجمالي النهائي المستحق:</p>
+              <p style="margin: 0 0 4px 0; font-size: 12px; color: #dddddd; font-family: 'Cairo', sans-serif;">الإجمالي&nbsp;النهائي&nbsp;المستحق:</p>
               <p style="margin: 0; font-size: 22px; font-weight: 900; color: #d7b704; font-family: 'Cairo', sans-serif; line-height: 1.3;">${grandTotal}&nbsp;ج.م</p>
             </td>
           </tr>
         </table>
 
-        <!-- 5. Stamp and Signatures Footer Table (Spaced & Separated Columns) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-top: 1px dashed #cccccc; padding-top: 14px; margin-top: 14px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
+        <!-- 5. Strict Borderless 50/50 Footer Table (No Overlap, Clean Separation) -->
+        <table dir="rtl" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border: none; border-top: 1px dashed #cccccc; margin-top: 30px; page-break-inside: avoid; break-inside: avoid; border-collapse: collapse; font-family: 'Cairo', sans-serif;">
           <tr>
-            <td align="right" valign="top" style="width: 65%; padding: 10px 0; text-align: right;">
-              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 700; color: #1a1a1a;">ملاحظات الإدارة:</p>
-              <p style="margin: 0; font-size: 11px; color: #555555; line-height: 1.7;">
-                يتم تحويل المستحقات بناءً على بيانات الدفع المسجلة أعلاه (${escapeHTML(member.paymentMethod || '')}:&nbsp;${escapeHTML(member.paymentAccount || '')}).
+            <td align="right" valign="top" style="width: 50%; vertical-align: top; text-align: right; padding-top: 15px;">
+              <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #1a1a1a;">ملاحظات&nbsp;الإدارة:</p>
+              <p style="margin: 0; font-size: 11px; color: #555555; line-height: 1.8;">
+                يتم&nbsp;تحويل&nbsp;المستحقات&nbsp;بناءً&nbsp;على&nbsp;بيانات&nbsp;الدفع&nbsp;المسجلة&nbsp;أعلاه&nbsp;(${safePaymentMethod}:&nbsp;${safePaymentAccount}).
               </p>
             </td>
-            <td align="center" valign="bottom" style="width: 35%; padding: 10px 0; text-align: center;">
-              <div style="border-bottom: 1.5px dotted #666666; width: 140px; margin: 0 auto 6px auto; height: 35px;"></div>
-              <p style="margin: 0; font-size: 12px; font-weight: 800; color: #1a1a1a;">إدارة فور دايركشنز</p>
+            <td align="center" valign="top" style="width: 50%; vertical-align: top; text-align: center; padding-top: 15px;">
+              <div style="border-bottom: 1.5px dotted #666666; width: 140px; margin: 0 auto 10px auto; height: 35px;"></div>
+              <p style="margin: 0; font-size: 12px; font-weight: 800; color: #1a1a1a;">إدارة&nbsp;فور&nbsp;دايركشنز</p>
             </td>
           </tr>
         </table>
@@ -1642,9 +1651,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>
     `;
 
-    // Strict A4 multi-page configuration with standard margins and avoidance of table row splits
+    // Strict A4 multi-page configuration with standard 10mm margins
     const opt = {
-      margin: [5, 5, 5, 5],
+      margin: [10, 10, 10, 10],
       filename: `كشف-حساب-${member.name.replace(/\s+/g, '-')}-${monthKey}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
@@ -1693,7 +1702,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   if (messageForm) {
     messageForm.addEventListener('submit', async (e) => {
       e.preventDefault();
-      
+
       const title = titleInput ? titleInput.value.trim() : '';
       const content = textInput ? textInput.value : '';
       const pinned = pinInput ? pinInput.checked : false;
@@ -1704,7 +1713,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       await addMessage(title, content, pinned);
-      
+
       messageForm.reset();
       updateTextareaCounters();
     });
@@ -1725,12 +1734,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   }
 
-  window.deleteMessage = function(id) {
+  window.deleteMessage = function (id) {
     const message = messages.find(m => m.id === id);
     if (!message) return;
 
     const messageTitle = message.title;
-    
+
     const cardEl = document.querySelector(`.message-card[data-id="${id}"]`);
     if (cardEl) {
       cardEl.style.opacity = '0';
@@ -1754,7 +1763,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 300);
   };
 
-  window.togglePin = async function(id) {
+  window.togglePin = async function (id) {
     const message = messages.find(m => m.id === id);
     if (!message) return;
 
@@ -1762,7 +1771,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       const docRef = doc(db, "messages", id);
       await updateDoc(docRef, { pinned: newPinnedState });
-      
+
       const statusText = newPinnedState ? 'تم تثبيتها في الأعلى' : 'تم إلغاء التثبيت';
       showToast(`"${message.title}" ${statusText}.`, 'info');
     } catch (err) {
@@ -1771,7 +1780,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   };
 
-  window.copyMessageText = async function(id, buttonEl) {
+  window.copyMessageText = async function (id, buttonEl) {
     const message = messages.find(m => m.id === id);
     if (!message) return;
 
@@ -1787,7 +1796,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       textarea.style.opacity = '0';
       document.body.appendChild(textarea);
       textarea.select();
-      
+
       try {
         const success = document.execCommand('copy');
         if (success) {
@@ -1806,9 +1815,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const originalHTML = buttonEl.innerHTML;
     buttonEl.classList.add('copied');
     buttonEl.innerHTML = `<i class="fa-solid fa-check"></i> تم النسخ!`;
-    
+
     showToast(`تم نسخ "${title}" بالكامل!`, 'success');
-    
+
     setTimeout(() => {
       buttonEl.classList.remove('copied');
       buttonEl.innerHTML = originalHTML;
@@ -1817,12 +1826,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderMessages() {
     if (!messagesGrid) return;
-    
+
     let filtered = messages.filter(msg => {
       if (currentFilter === 'pinned' && !msg.pinned) {
         return false;
       }
-      
+
       if (searchQuery) {
         const titleMatch = (msg.title || '').toLowerCase().includes(searchQuery);
         const contentMatch = (msg.content || '').toLowerCase().includes(searchQuery);
@@ -1846,7 +1855,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (filtered.length === 0) {
       if (emptyState) {
         emptyState.style.display = 'flex';
-        
+
         if (searchQuery) {
           emptyState.querySelector('.empty-title').textContent = 'لا توجد رسائل مطابقة';
           emptyState.querySelector('.empty-desc').textContent = `لا توجد رسائل تطابق البحث عن "${searchQuery}". حاول مجدداً بكلمة أخرى.`;
@@ -1868,7 +1877,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const card = document.createElement('article');
         card.className = `message-card ${msg.pinned ? 'pinned' : ''}`;
         card.setAttribute('data-id', msg.id);
-        
+
         const escapedTitle = escapeHTML(msg.title);
         const escapedContent = escapeHTML(msg.content);
 
@@ -1901,7 +1910,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </button>
           </div>
         `;
-        
+
         messagesGrid.appendChild(card);
       });
     }
