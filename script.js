@@ -1675,4 +1675,278 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast("مكتبة توليد الـ PDF غير محملة. يرجى إعادة تحديث الصفحة.", "danger");
     }
   };
+
+  // --- Message Vault Operations (Add, Render, Copy, Pin, Delete, Counters) ---
+
+  function updateTextareaCounters() {
+    if (!textInput || !charCountEl) return;
+    const text = textInput.value;
+    const charCount = text.length;
+    const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    charCountEl.textContent = `${charCount} حرف | ${wordCount} كلمة`;
+  }
+
+  if (textInput) {
+    textInput.addEventListener('input', updateTextareaCounters);
+  }
+
+  if (messageForm) {
+    messageForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const title = titleInput ? titleInput.value.trim() : '';
+      const content = textInput ? textInput.value : '';
+      const pinned = pinInput ? pinInput.checked : false;
+
+      if (!title || !content.trim()) {
+        showToast('يرجى ملء عنوان الرسالة ومحتواها لحفظها.', 'danger');
+        return;
+      }
+
+      await addMessage(title, content, pinned);
+      
+      messageForm.reset();
+      updateTextareaCounters();
+    });
+  }
+
+  async function addMessage(title, content, pinned) {
+    try {
+      await addDoc(messagesCol, {
+        title: title,
+        content: content,
+        pinned: pinned,
+        timestamp: serverTimestamp()
+      });
+      showToast('تم حفظ الرسالة بنجاح في المخزن!', 'success');
+    } catch (err) {
+      console.error("Error adding message:", err);
+      showToast('فشل في حفظ الرسالة في قاعدة البيانات.', 'danger');
+    }
+  }
+
+  window.deleteMessage = function(id) {
+    const message = messages.find(m => m.id === id);
+    if (!message) return;
+
+    const messageTitle = message.title;
+    
+    const cardEl = document.querySelector(`.message-card[data-id="${id}"]`);
+    if (cardEl) {
+      cardEl.style.opacity = '0';
+      cardEl.style.transform = 'scale(0.9) translateY(10px)';
+      cardEl.style.transition = 'all 0.3s ease-out';
+    }
+
+    setTimeout(async () => {
+      try {
+        const docRef = doc(db, "messages", id);
+        await deleteDoc(docRef);
+        showToast(`تم حذف الرسالة "${messageTitle}" بنجاح.`, 'danger');
+      } catch (err) {
+        console.error("Error deleting message:", err);
+        showToast('فشل في حذف الرسالة من قاعدة البيانات.', 'danger');
+        if (cardEl) {
+          cardEl.style.opacity = '1';
+          cardEl.style.transform = 'none';
+        }
+      }
+    }, 300);
+  };
+
+  window.togglePin = async function(id) {
+    const message = messages.find(m => m.id === id);
+    if (!message) return;
+
+    const newPinnedState = !message.pinned;
+    try {
+      const docRef = doc(db, "messages", id);
+      await updateDoc(docRef, { pinned: newPinnedState });
+      
+      const statusText = newPinnedState ? 'تم تثبيتها في الأعلى' : 'تم إلغاء التثبيت';
+      showToast(`"${message.title}" ${statusText}.`, 'info');
+    } catch (err) {
+      console.error("Error updating pin state:", err);
+      showToast('فشل في تعديل حالة تثبيت الرسالة.', 'danger');
+    }
+  };
+
+  window.copyMessageText = async function(id, buttonEl) {
+    const message = messages.find(m => m.id === id);
+    if (!message) return;
+
+    try {
+      await navigator.clipboard.writeText(message.content);
+      applyCopyFeedback(buttonEl, message.title);
+    } catch (err) {
+      const textarea = document.createElement('textarea');
+      textarea.value = message.content;
+      textarea.style.position = 'fixed';
+      textarea.style.top = '0';
+      textarea.style.left = '0';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      
+      try {
+        const success = document.execCommand('copy');
+        if (success) {
+          applyCopyFeedback(buttonEl, message.title);
+        } else {
+          showToast('تعذر نسخ محتوى الرسالة.', 'danger');
+        }
+      } catch (fallbackErr) {
+        showToast('تعذر النسخ. يرجى التحديد والنسخ يدوياً.', 'danger');
+      }
+      document.body.removeChild(textarea);
+    }
+  };
+
+  function applyCopyFeedback(buttonEl, title) {
+    const originalHTML = buttonEl.innerHTML;
+    buttonEl.classList.add('copied');
+    buttonEl.innerHTML = `<i class="fa-solid fa-check"></i> تم النسخ!`;
+    
+    showToast(`تم نسخ "${title}" بالكامل!`, 'success');
+    
+    setTimeout(() => {
+      buttonEl.classList.remove('copied');
+      buttonEl.innerHTML = originalHTML;
+    }, 1500);
+  }
+
+  function renderMessages() {
+    if (!messagesGrid) return;
+    
+    let filtered = messages.filter(msg => {
+      if (currentFilter === 'pinned' && !msg.pinned) {
+        return false;
+      }
+      
+      if (searchQuery) {
+        const titleMatch = (msg.title || '').toLowerCase().includes(searchQuery);
+        const contentMatch = (msg.content || '').toLowerCase().includes(searchQuery);
+        return titleMatch || contentMatch;
+      }
+
+      return true;
+    });
+
+    filtered.sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    const existingCards = messagesGrid.querySelectorAll('.message-card');
+    existingCards.forEach(card => card.remove());
+
+    if (messagesCountBadge) messagesCountBadge.textContent = filtered.length;
+
+    if (filtered.length === 0) {
+      if (emptyState) {
+        emptyState.style.display = 'flex';
+        
+        if (searchQuery) {
+          emptyState.querySelector('.empty-title').textContent = 'لا توجد رسائل مطابقة';
+          emptyState.querySelector('.empty-desc').textContent = `لا توجد رسائل تطابق البحث عن "${searchQuery}". حاول مجدداً بكلمة أخرى.`;
+          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-magnifying-glass-minus"></i>';
+        } else if (currentFilter === 'pinned') {
+          emptyState.querySelector('.empty-title').textContent = 'لا توجد رسائل مثبتة';
+          emptyState.querySelector('.empty-desc').textContent = 'لم تقم بتثبيت أي رسالة بعد. اضغط على رمز التثبيت على أي بطاقة لتثبيتها في الأعلى.';
+          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-thumbtack"></i>';
+        } else {
+          emptyState.querySelector('.empty-title').textContent = 'المخزن فارغ حالياً';
+          emptyState.querySelector('.empty-desc').textContent = 'أنشئ قالب رسالة واتساب الأول من اللوحة الجانبية لملء المخزن.';
+          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-box-open"></i>';
+        }
+      }
+    } else {
+      if (emptyState) emptyState.style.display = 'none';
+
+      filtered.forEach(msg => {
+        const card = document.createElement('article');
+        card.className = `message-card ${msg.pinned ? 'pinned' : ''}`;
+        card.setAttribute('data-id', msg.id);
+        
+        const escapedTitle = escapeHTML(msg.title);
+        const escapedContent = escapeHTML(msg.content);
+
+        card.innerHTML = `
+          <div class="card-header">
+            <h3 class="card-title" title="${escapedTitle}">${escapedTitle}</h3>
+            <div class="card-actions">
+              <button 
+                class="action-btn pin-btn ${msg.pinned ? 'is-pinned' : ''}" 
+                onclick="togglePin('${msg.id}')" 
+                title="${msg.pinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة'}"
+              >
+                <i class="fa-solid fa-thumbtack"></i>
+              </button>
+              <button 
+                class="action-btn delete-btn" 
+                onclick="deleteMessage('${msg.id}')" 
+                title="حذف الرسالة"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="card-content">${escapedContent}</div>
+          
+          <div class="card-footer">
+            <button class="btn-copy" onclick="copyMessageText('${msg.id}', this)" title="نسخ محتوى الرسالة">
+              <i class="fa-regular fa-clone"></i> نسخ الرسالة
+            </button>
+          </div>
+        `;
+        
+        messagesGrid.appendChild(card);
+      });
+    }
+  }
+
+  // --- Filter and Search listeners ---
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      if (searchInput.value.length > 0) {
+        if (clearSearchBtn) clearSearchBtn.style.display = 'block';
+      } else {
+        if (clearSearchBtn) clearSearchBtn.style.display = 'none';
+      }
+      renderMessages();
+    });
+  }
+
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.style.display = 'none';
+      if (searchInput) searchInput.focus();
+      renderMessages();
+    });
+  }
+
+  if (tabAll) {
+    tabAll.addEventListener('click', () => {
+      setActiveTab(tabAll, 'all');
+    });
+  }
+
+  if (tabPinned) {
+    tabPinned.addEventListener('click', () => {
+      setActiveTab(tabPinned, 'pinned');
+    });
+  }
+
+  function setActiveTab(activeTabEl, filterType) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    activeTabEl.classList.add('active');
+    currentFilter = filterType;
+    renderMessages();
+  }
 });
