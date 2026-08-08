@@ -5,6 +5,28 @@
  */
 
 // Import Firebase SDK Modules from Official CDN
+// دوال مساعدة لضمان عدم توقف الكود
+window.escapeHTML = function (str) {
+  if (!str) return '';
+  return String(str).replace(/[&<>'"]/g, match => {
+    const escapeMap = {
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      "'": '&#39;',
+      '"': '&quot;'
+    };
+    return escapeMap[match];
+  });
+};
+
+window.showToast = function (message, type = "success") {
+  // إشعار مؤقت عشان الكود يكمل وميضربش
+  console.log("إشعار:", message);
+  // لو حابب تشوف الإشعارات بعينك ممكن تفعل السطر اللي تحت
+  // alert(message); 
+};
+
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import {
   getFirestore,
