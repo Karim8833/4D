@@ -1,8 +1,7 @@
 /**
- * Four Directions Message Vault - Client-side Logic (Arabic Firebase Edition)
- * Complete upgrade containing Firestore credentials auth, Admin panel controls, 
- * Real-time snapshot sync, Events Management, Smart Pricing, Monthly Settlements, 
- * and Arabic RTL PDF Statement Generation.
+ * Four Directions Message Vault & Events Management - Client-side Logic (Arabic Firestore Edition)
+ * Firestore Credentials Auth, Role-Based Access Control (RBAC), Events Management,
+ * Smart Pricing, Monthly Settlements Dashboard, and Arabic RTL PDF Statement Generator.
  */
 
 // Import Firebase SDK Modules from Official CDN
@@ -37,13 +36,15 @@ const firebaseConfig = {
 // Initialize Firebase App & Firestore Database
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Firestore Collections
 const messagesCol = collection(db, "messages");
 const usersCol = collection(db, "users");
 const teamCol = collection(db, "team_members");
 const eventsCol = collection(db, "events");
 const settlementsCol = collection(db, "settlements");
 
-// Subscription unsubscribers
+// Subscription unsubscribers for real-time listeners
 let unsubscribeMessages = null;
 let unsubscribeUsers = null;
 let unsubscribeTeam = null;
@@ -55,6 +56,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loginForm = document.getElementById('login-form');
   const loginUsernameInput = document.getElementById('login-username');
   const loginPasswordInput = document.getElementById('login-password');
+  const loginBtn = document.getElementById('login-btn');
 
   // DOM Elements - Sidebar & Layout
   const navLinks = document.querySelectorAll('.nav-link');
@@ -185,27 +187,29 @@ document.addEventListener('DOMContentLoaded', async () => {
     settlementMonthSelect.value = getSystemCurrentMonth();
   }
 
-  // 1. Initial boot: Create default admin user if users collection is empty
+  // 1. Initial boot: Ensure default admin account exists in Firestore
   await initializeDefaultAdmin();
 
-  // 2. Check active login session from sessionStorage
+  // 2. Check active login session from sessionStorage/localStorage
   checkSession();
 
   // --- Session Management & RBAC ---
 
   function checkSession() {
-    const savedUser = sessionStorage.getItem('fd_user');
+    const savedUser = sessionStorage.getItem('fd_user') || localStorage.getItem('fd_user');
     if (savedUser) {
       try {
         const userObj = JSON.parse(savedUser);
-        loginUserSession(userObj.username, userObj.role);
+        if (userObj && userObj.username && userObj.role) {
+          loginUserSession(userObj.username, userObj.role);
+          return;
+        }
       } catch (e) {
         sessionStorage.removeItem('fd_user');
-        showLoginScreen();
+        localStorage.removeItem('fd_user');
       }
-    } else {
-      showLoginScreen();
     }
+    showLoginScreen();
   }
 
   function showLoginScreen() {
@@ -214,11 +218,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function loginUserSession(username, role) {
-    sessionStorage.setItem('fd_user', JSON.stringify({ username, role }));
+    // Persist session in sessionStorage and localStorage
+    const sessionData = JSON.stringify({ username, role });
+    sessionStorage.setItem('fd_user', sessionData);
+    localStorage.setItem('fd_user', sessionData);
 
     document.getElementById('login-container').style.display = 'none';
     document.getElementById('app-wrapper').style.display = 'block';
-    document.getElementById('user-display-name').textContent = username;
+    
+    const userDisplayName = document.getElementById('user-display-name');
+    if (userDisplayName) {
+      userDisplayName.textContent = username;
+    }
     
     // Inject dynamic hero greeting
     const heroGreeting = document.getElementById('hero-greeting');
@@ -234,15 +245,89 @@ document.addEventListener('DOMContentLoaded', async () => {
       adminOnlyElements.forEach(el => el.style.display = 'none');
     }
 
-    homeStats.style.display = 'flex';
+    if (homeStats) homeStats.style.display = 'flex';
     setupTeamRealtimeListener();
     setupEventsRealtimeListener();
     setupSettlementsRealtimeListener();
     setupMessagesRealtimeListener();
     updateTextareaCounters();
 
-    // Default route
+    // Redirect to main dashboard
     switchView('home-view');
+  }
+
+  // --- 1. Robust Firestore Login Form Submission Handler ---
+
+  if (loginForm) {
+    loginForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const username = loginUsernameInput.value.trim();
+      const password = loginPasswordInput.value.trim();
+
+      if (!username || !password) {
+        showToast("يرجى إدخال اسم المستخدم وكلمة المرور.", "danger");
+        return;
+      }
+
+      // UI Loading Feedback
+      const originalBtnHTML = loginBtn.innerHTML;
+      loginBtn.disabled = true;
+      loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
+
+      try {
+        // Query Firestore users collection for matching username and password
+        const authQuery = query(
+          usersCol, 
+          where("username", "==", username), 
+          where("password", "==", password)
+        );
+        
+        const querySnapshot = await getDocs(authQuery);
+        
+        if (!querySnapshot.empty) {
+          const userDoc = querySnapshot.docs[0].data();
+          const role = userDoc.role || 'user';
+          
+          // Successful login: save session and redirect to dashboard
+          loginUserSession(userDoc.username, role);
+          showToast(`أهلاً بك مجدداً، ${userDoc.username}!`, "success");
+          loginForm.reset();
+        } else {
+          // Authentication failed: invalid credentials
+          console.error("Firestore Login Error: auth/invalid-credentials", "اسم المستخدم أو كلمة المرور غير صحيحة.");
+          showToast("اسم المستخدم أو كلمة المرور غير صحيحة", "danger");
+        }
+      } catch (error) {
+        // Detailed error logging for easy debugging
+        console.error("Firestore Login Error:", error.code || "unknown-code", error.message || error);
+        
+        if (error.code === 'unavailable' || error.message?.includes('network')) {
+          showToast("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً", "danger");
+        } else {
+          showToast("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً", "danger");
+        }
+      } finally {
+        // Restore login button state
+        loginBtn.disabled = false;
+        loginBtn.innerHTML = originalBtnHTML;
+      }
+    });
+  }
+
+  // Logout Handler
+  const logoutBtn = document.getElementById('logout-btn');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      if (unsubscribeUsers) unsubscribeUsers();
+      if (unsubscribeMessages) unsubscribeMessages();
+      if (unsubscribeTeam) unsubscribeTeam();
+      if (unsubscribeEvents) unsubscribeEvents();
+      if (unsubscribeSettlements) unsubscribeSettlements();
+      sessionStorage.removeItem('fd_user');
+      localStorage.removeItem('fd_user');
+      window.location.reload(); 
+    });
   }
 
   // Open & Close Mobile Sidebar Functions
@@ -478,7 +563,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         statTeamCount.textContent = teamMembers.length;
       }
 
-      // Re-populate modal attendee options if open
       populateAttendeeDropdown();
       renderMonthlySettlements();
 
@@ -515,7 +599,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         statEventsCount.textContent = eventsList.length;
       }
 
-      // If attendee modal is open for a specific event, refresh it
       if (activeEventId) {
         const activeEvt = eventsList.find(e => e.id === activeEventId);
         if (activeEvt) {
@@ -1023,7 +1106,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       attendees.forEach(att => {
         const mId = att.memberId;
         if (!memberAggregates[mId]) {
-          // Find up-to-date team member record if exists
           const currentMember = teamMembers.find(t => t.id === mId);
           memberAggregates[mId] = {
             memberId: mId,
@@ -1498,5 +1580,491 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast("مكتبة توليد الـ PDF غير محملة. يرجى إعادة تحديث الصفحة.", "danger");
     }
   };
-});
 
+  // --- Admin User Operations ---
+
+  if (addUserForm) {
+    addUserForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = adminUsernameInput.value.trim();
+      const password = adminPasswordInput.value.trim();
+      const role = adminRoleSelect.value;
+
+      if (!username || !password) {
+        showToast("يرجى ملء كافة البيانات لإنشاء المستخدم.", "danger");
+        return;
+      }
+
+      try {
+        const checkQuery = query(usersCol, where("username", "==", username));
+        const checkSnapshot = await getDocs(checkQuery);
+        
+        if (!checkSnapshot.empty) {
+          showToast("اسم المستخدم هذا مسجل بالفعل في النظام.", "danger");
+          return;
+        }
+
+        await addDoc(usersCol, {
+          username: username,
+          password: password,
+          role: role,
+          createdAt: serverTimestamp()
+        });
+
+        showToast(`تمت إضافة المستخدم "${username}" بنجاح!`, "success");
+        addUserForm.reset();
+      } catch (err) {
+        console.error("Error adding user:", err);
+        showToast("فشل في إضافة المستخدم الجديد.", "danger");
+      }
+    });
+  }
+
+  window.deleteUser = async function(id) {
+    try {
+      const docRef = doc(db, "users", id);
+      const docSnap = await getDoc(docRef);
+
+      if (!docSnap.exists()) {
+        showToast("المستخدم غير موجود.", "danger");
+        return;
+      }
+
+      const targetUsername = docSnap.data().username;
+
+      if (targetUsername === 'admin') {
+        showToast("لا يمكن حذف حساب المسؤول الرئيسي للموقع.", "danger");
+        return;
+      }
+
+      if (confirm(`هل أنت متأكد من حذف حساب المستخدم "${targetUsername}"؟`)) {
+        await deleteDoc(docRef);
+        showToast(`تم حذف حساب المستخدم "${targetUsername}" بنجاح.`, "success");
+      }
+    } catch (err) {
+      console.error("Error deleting user:", err);
+      showToast("فشل في حذف المستخدم.", "danger");
+    }
+  };
+
+  // --- Team Management Operations ---
+
+  async function getNextTeamCode() {
+    try {
+      const snapshot = await getDocs(teamCol);
+      let maxNum = 0;
+
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.code) {
+          const match = data.code.match(/4D-(\d+)/i);
+          if (match && match[1]) {
+            const num = parseInt(match[1], 10);
+            if (!isNaN(num) && num > maxNum) {
+              maxNum = num;
+            }
+          }
+        }
+      });
+
+      const nextNum = maxNum + 1;
+      return `4D-${nextNum}`;
+    } catch (err) {
+      console.error("Error calculating sequential team code:", err);
+      return `4D-1`;
+    }
+  }
+
+  if (addTeamForm) {
+    addTeamForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = teamMemberName.value.trim();
+      const rank = teamMemberRank.value;
+      const phone = teamMemberPhone.value.trim();
+      const paymentMethod = teamMemberPaymentMethod.value;
+      const paymentAccount = teamMemberPaymentAccount.value.trim();
+
+      if (!name || !rank || !phone || !paymentMethod || !paymentAccount) {
+        showToast("يرجى ملء جميع البيانات المطلوبة لعضو الفريق.", "danger");
+        return;
+      }
+
+      const generatedCode = await getNextTeamCode();
+
+      try {
+        await addDoc(teamCol, {
+          name: name,
+          rank: rank,
+          phone: phone,
+          paymentMethod: paymentMethod,
+          paymentAccount: paymentAccount,
+          code: generatedCode,
+          createdAt: serverTimestamp()
+        });
+
+        showToast(`تم إضافة العضو "${name}" بنجاح بالكود ${generatedCode}`, "success");
+        addTeamForm.reset();
+      } catch (err) {
+        console.error("Error adding team member:", err);
+        showToast("فشل في إضافة عضو الفريق.", "danger");
+      }
+    });
+  }
+
+  window.deleteTeamMember = async function(id) {
+    if (confirm(`هل أنت متأكد من إزالة هذا العضو من الفريق؟`)) {
+      try {
+        await deleteDoc(doc(db, "team_members", id));
+        showToast(`تم حذف العضو من الفريق.`, "success");
+      } catch (err) {
+        console.error("Error deleting team member:", err);
+        showToast("فشل في حذف العضو.", "danger");
+      }
+    }
+  };
+
+  // --- Message operations ---
+
+  if (messageForm) {
+    messageForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const title = titleInput.value.trim();
+      const content = textInput.value; 
+      const pinned = pinInput.checked;
+
+      if (!title || !content.trim()) {
+        showToast('يرجى ملء عنوان الرسالة ومحتواها لحفظها.', 'danger');
+        return;
+      }
+
+      await addMessage(title, content, pinned);
+      
+      messageForm.reset();
+      updateTextareaCounters();
+    });
+  }
+
+  if (textInput) textInput.addEventListener('input', updateTextareaCounters);
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      searchQuery = searchInput.value.trim().toLowerCase();
+      
+      if (searchInput.value.length > 0) {
+        clearSearchBtn.style.display = 'block';
+      } else {
+        clearSearchBtn.style.display = 'none';
+      }
+      
+      renderMessages();
+    });
+  }
+
+  if (clearSearchBtn) {
+    clearSearchBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearSearchBtn.style.display = 'none';
+      searchInput.focus();
+      renderMessages();
+    });
+  }
+
+  if (tabAll) {
+    tabAll.addEventListener('click', () => {
+      setActiveTab(tabAll, 'all');
+    });
+  }
+
+  if (tabPinned) {
+    tabPinned.addEventListener('click', () => {
+      setActiveTab(tabPinned, 'pinned');
+    });
+  }
+
+  function setActiveTab(activeTabEl, filterType) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    activeTabEl.classList.add('active');
+    currentFilter = filterType;
+    renderMessages();
+  }
+
+  function updateTextareaCounters() {
+    if (!textInput || !charCountEl) return;
+    const text = textInput.value;
+    const charCount = text.length;
+    const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
+    charCountEl.textContent = `${charCount} حرف | ${wordCount} كلمة`;
+  }
+
+  async function initializeDefaultAdmin() {
+    try {
+      const snapshot = await getDocs(usersCol);
+      if (snapshot.empty) {
+        await addDoc(usersCol, {
+          username: "admin",
+          password: "admin123",
+          role: "admin",
+          createdAt: serverTimestamp()
+        });
+        console.log("Default admin account created in Firestore: admin / admin123");
+      }
+    } catch (err) {
+      console.error("Initialization check error:", err);
+    }
+  }
+
+  async function addMessage(title, content, pinned) {
+    try {
+      await addDoc(messagesCol, {
+        title: title,
+        content: content,
+        pinned: pinned,
+        timestamp: serverTimestamp()
+      });
+      showToast('تم حفظ الرسالة بنجاح في المخزن!', 'success');
+    } catch (err) {
+      console.error("Error adding message:", err);
+      showToast('فشل في حفظ الرسالة في قاعدة البيانات.', 'danger');
+    }
+  }
+
+  window.deleteMessage = function(id) {
+    const message = messages.find(m => m.id === id);
+    if (!message) return;
+
+    const messageTitle = message.title;
+    
+    const cardEl = document.querySelector(`.message-card[data-id="${id}"]`);
+    if (cardEl) {
+      cardEl.style.opacity = '0';
+      cardEl.style.transform = 'scale(0.9) translateY(10px)';
+      cardEl.style.transition = 'all 0.3s ease-out';
+    }
+
+    setTimeout(async () => {
+      try {
+        const docRef = doc(db, "messages", id);
+        await deleteDoc(docRef);
+        showToast(`تم حذف الرسالة "${messageTitle}" بنجاح.`, 'danger');
+      } catch (err) {
+        console.error("Error deleting message:", err);
+        showToast('فشل في حذف الرسالة من قاعدة البيانات.', 'danger');
+        if (cardEl) {
+          cardEl.style.opacity = '1';
+          cardEl.style.transform = 'none';
+        }
+      }
+    }, 300);
+  };
+
+  window.togglePin = async function(id) {
+    const message = messages.find(m => m.id === id);
+    if (!message) return;
+
+    const newPinnedState = !message.pinned;
+    try {
+      const docRef = doc(db, "messages", id);
+      await updateDoc(docRef, { pinned: newPinnedState });
+      
+      const statusText = newPinnedState ? 'تم تثبيتها في الأعلى' : 'تم إلغاء التثبيت';
+      showToast(`"${message.title}" ${statusText}.`, 'info');
+    } catch (err) {
+      console.error("Error updating pin state:", err);
+      showToast('فشل في تعديل حالة تثبيت الرسالة.', 'danger');
+    }
+  };
+
+  window.copyMessageText = async function(id, buttonEl) {
+    const message = messages.find(m => m.id === id);
+    if (!message) return;
+
+    try {
+      await navigator.clipboard.writeText(message.content);
+      applyCopyFeedback(buttonEl, message.title);
+    } catch (err) {
+      const textarea = document.createElement('textarea');
+      textarea.value = message.content;
+      textarea.style.position = 'fixed';
+      textarea.style.top = '0';
+      textarea.style.left = '0';
+      textarea.style.opacity = '0';
+      document.body.appendChild(textarea);
+      textarea.select();
+      
+      try {
+        const success = document.execCommand('copy');
+        if (success) {
+          applyCopyFeedback(buttonEl, message.title);
+        } else {
+          showToast('تعذر نسخ محتوى الرسالة.', 'danger');
+        }
+      } catch (fallbackErr) {
+        showToast('تعذر النسخ. يرجى التحديد والنسخ يدوياً.', 'danger');
+      }
+      document.body.removeChild(textarea);
+    }
+  };
+
+  function applyCopyFeedback(buttonEl, title) {
+    const originalHTML = buttonEl.innerHTML;
+    buttonEl.classList.add('copied');
+    buttonEl.innerHTML = `<i class="fa-solid fa-check"></i> تم النسخ!`;
+    
+    showToast(`تم نسخ "${title}" بالكامل!`, 'success');
+    
+    setTimeout(() => {
+      buttonEl.classList.remove('copied');
+      buttonEl.innerHTML = originalHTML;
+    }, 1500);
+  }
+
+  function renderMessages() {
+    if (!messagesGrid) return;
+    
+    let filtered = messages.filter(msg => {
+      if (currentFilter === 'pinned' && !msg.pinned) {
+        return false;
+      }
+      
+      if (searchQuery) {
+        const titleMatch = msg.title.toLowerCase().includes(searchQuery);
+        const contentMatch = msg.content.toLowerCase().includes(searchQuery);
+        return titleMatch || contentMatch;
+      }
+
+      return true;
+    });
+
+    filtered.sort((a, b) => {
+      if (a.pinned && !b.pinned) return -1;
+      if (!a.pinned && b.pinned) return 1;
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+
+    const existingCards = messagesGrid.querySelectorAll('.message-card');
+    existingCards.forEach(card => card.remove());
+
+    if (messagesCountBadge) messagesCountBadge.textContent = filtered.length;
+
+    if (filtered.length === 0) {
+      if (emptyState) {
+        emptyState.style.display = 'flex';
+        
+        if (searchQuery) {
+          emptyState.querySelector('.empty-title').textContent = 'لا توجد رسائل مطابقة';
+          emptyState.querySelector('.empty-desc').textContent = `لا توجد رسائل تطابق البحث عن "${searchQuery}". حاول مجدداً بكلمة أخرى.`;
+          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-magnifying-glass-minus"></i>';
+        } else if (currentFilter === 'pinned') {
+          emptyState.querySelector('.empty-title').textContent = 'لا توجد رسائل مثبتة';
+          emptyState.querySelector('.empty-desc').textContent = 'لم تقم بتثبيت أي رسالة بعد. اضغط على رمز التثبيت على أي بطاقة لتثبيتها في الأعلى.';
+          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-thumbtack"></i>';
+        } else {
+          emptyState.querySelector('.empty-title').textContent = 'المخزن فارغ حالياً';
+          emptyState.querySelector('.empty-desc').textContent = 'أنشئ قالب رسالة واتساب الأول من اللوحة الجانبية لملء المخزن.';
+          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-box-open"></i>';
+        }
+      }
+    } else {
+      if (emptyState) emptyState.style.display = 'none';
+
+      filtered.forEach(msg => {
+        const card = document.createElement('article');
+        card.className = `message-card ${msg.pinned ? 'pinned' : ''}`;
+        card.setAttribute('data-id', msg.id);
+        
+        const escapedTitle = escapeHTML(msg.title);
+        const escapedContent = escapeHTML(msg.content);
+
+        card.innerHTML = `
+          <div class="card-header">
+            <h3 class="card-title" title="${escapedTitle}">${escapedTitle}</h3>
+            <div class="card-actions">
+              <button 
+                class="action-btn pin-btn ${msg.pinned ? 'is-pinned' : ''}" 
+                onclick="togglePin('${msg.id}')" 
+                title="${msg.pinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة'}"
+              >
+                <i class="fa-solid fa-thumbtack"></i>
+              </button>
+              <button 
+                class="action-btn delete-btn" 
+                onclick="deleteMessage('${msg.id}')" 
+                title="حذف الرسالة"
+              >
+                <i class="fa-solid fa-trash-can"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="card-content">${escapedContent}</div>
+          
+          <div class="card-footer">
+            <button class="btn-copy" onclick="copyMessageText('${msg.id}', this)" title="نسخ محتوى الرسالة">
+              <i class="fa-regular fa-clone"></i> نسخ الرسالة
+            </button>
+          </div>
+        `;
+        
+        messagesGrid.appendChild(card);
+      });
+    }
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function showToast(message, type = 'info') {
+    if (!toastContainer) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    
+    let icon = '<i class="fa-solid fa-circle-info"></i>';
+    if (type === 'success') {
+      icon = '<i class="fa-solid fa-circle-check"></i>';
+    } else if (type === 'danger') {
+      icon = '<i class="fa-solid fa-circle-exclamation"></i>';
+    }
+
+    toast.innerHTML = `
+      <span class="toast-icon">${icon}</span>
+      <span class="toast-message">${message}</span>
+      <button class="toast-close" title="إغلاق التنبيه">&times;</button>
+    `;
+
+    toastContainer.appendChild(toast);
+
+    const timeoutId = setTimeout(() => {
+      removeToast(toast);
+    }, 3500);
+
+    toast.querySelector('.toast-close').addEventListener('click', () => {
+      clearTimeout(timeoutId);
+      removeToast(toast);
+    });
+  }
+
+  function removeToast(toastEl) {
+    toastEl.style.opacity = '0';
+    const width = window.innerWidth;
+    if (width >= 600) {
+      toastEl.style.transform = 'translateX(100%)';
+    } else {
+      toastEl.style.transform = 'translateX(-100%)';
+    }
+    setTimeout(() => {
+      if (toastEl.parentNode === toastContainer) {
+        toastContainer.removeChild(toastEl);
+      }
+    }, 300);
+  }
+});
