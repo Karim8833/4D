@@ -6,21 +6,21 @@
 
 // Import Firebase SDK Modules from Official CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { 
-  getFirestore, 
-  collection, 
-  addDoc, 
+import {
+  getFirestore,
+  collection,
+  addDoc,
   getDoc,
-  deleteDoc, 
-  doc, 
+  deleteDoc,
+  doc,
   setDoc,
-  updateDoc, 
-  onSnapshot, 
-  query, 
-  orderBy, 
+  updateDoc,
+  onSnapshot,
+  query,
+  orderBy,
   where,
   getDocs,
-  serverTimestamp 
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
 // User's Firebase Configuration
@@ -81,15 +81,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const textInput = document.getElementById('message-text');
   const pinInput = document.getElementById('message-pin');
   const charCountEl = document.getElementById('char-count');
-  
+
   // DOM Elements - Search Section
   const searchInput = document.getElementById('search-input');
   const clearSearchBtn = document.getElementById('clear-search');
-  
+
   // DOM Elements - Filter Tabs
   const tabAll = document.getElementById('filter-all');
   const tabPinned = document.getElementById('filter-pinned');
-  
+
   // DOM Elements - Feed Section
   const messagesGrid = document.getElementById('messages-grid');
   const emptyState = document.getElementById('empty-state');
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let teamMembers = [];
   let eventsList = [];
   let settlementsMap = {};
-  let currentFilter = 'all'; 
+  let currentFilter = 'all';
   let searchQuery = '';
   let activeEventId = null;
 
@@ -188,8 +188,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // 1. Initial boot: Ensure default admin account exists in Firestore
-  await initializeDefaultAdmin();
-
   // 2. Check active login session from sessionStorage/localStorage
   checkSession();
 
@@ -225,18 +223,18 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     document.getElementById('login-container').style.display = 'none';
     document.getElementById('app-wrapper').style.display = 'block';
-    
+
     const userDisplayName = document.getElementById('user-display-name');
     if (userDisplayName) {
       userDisplayName.textContent = username;
     }
-    
+
     // Inject dynamic hero greeting
     const heroGreeting = document.getElementById('hero-greeting');
     if (heroGreeting) {
       heroGreeting.innerHTML = `أهلاً يا <span class="brand-accent">${escapeHTML(username)}</span> 👋`;
     }
-    
+
     // RBAC: Toggle Admin-only elements
     if (role === 'admin') {
       adminOnlyElements.forEach(el => el.style.display = '');
@@ -281,13 +279,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       // Query Firestore 'users' collection using Firebase v9 Modular Syntax
       const q = query(
-        collection(db, "users"), 
-        where("username", "==", enteredUser), 
+        collection(db, "users"),
+        where("username", "==", enteredUser),
         where("password", "==", enteredPass)
       );
-      
+
       const querySnapshot = await getDocs(q);
-      
+
       // Success State: User document found
       if (!querySnapshot.empty) {
         let userRole = 'user';
@@ -304,7 +302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         localStorage.setItem('username', userName);
         localStorage.setItem('fd_user', JSON.stringify({ username: userName, role: userRole }));
         sessionStorage.setItem('fd_user', JSON.stringify({ username: userName, role: userRole }));
-        
+
         // Switch to main dashboard and initialize session views
         loginUserSession(userName, userRole);
         showToast(`أهلاً بك مجدداً، ${userName}!`, "success");
@@ -361,7 +359,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (unsubscribeSettlements) unsubscribeSettlements();
       sessionStorage.removeItem('fd_user');
       localStorage.removeItem('fd_user');
-      window.location.reload(); 
+      window.location.reload();
     });
   }
 
@@ -383,7 +381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       e.preventDefault();
       const targetId = link.getAttribute('data-target');
       switchView(targetId);
-      
+
       // Close sidebar on mobile after clicking
       if (window.innerWidth <= 768) {
         closeMobileSidebar();
@@ -438,9 +436,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function setupMessagesRealtimeListener() {
     if (unsubscribeMessages) unsubscribeMessages();
-    
+
     const q = query(messagesCol, orderBy("timestamp", "desc"));
-    
+
     unsubscribeMessages = onSnapshot(q, (snapshot) => {
       messages = [];
       snapshot.forEach((docSnap) => {
@@ -463,22 +461,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function setupUsersRealtimeListener() {
     if (unsubscribeUsers) unsubscribeUsers();
-    
+
     const usersQ = query(usersCol, orderBy("username", "asc"));
-    
+
     unsubscribeUsers = onSnapshot(usersQ, (snapshot) => {
       const tableBody = document.getElementById('users-table-body');
       if (!tableBody) return;
       tableBody.innerHTML = '';
-      
+
       snapshot.forEach((docSnap) => {
         const u = docSnap.data();
         const id = docSnap.id;
-        
+
         const row = document.createElement('tr');
         const roleLabel = u.role === 'admin' ? 'مسؤول النظام' : 'مستخدم عادي';
         const roleClass = u.role === 'admin' ? 'admin' : 'user';
-        
+
         const isPrimaryAdmin = u.username === 'admin';
         const disabledAttr = isPrimaryAdmin ? 'disabled' : '';
         const titleAttr = isPrimaryAdmin ? 'لا يمكن حذف الحساب الرئيسي للمسؤول' : 'حذف هذا المستخدم';
@@ -531,10 +529,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       snapshot.forEach((docSnap) => {
         const t = docSnap.data();
         teamMembers.push({ id: docSnap.id, ...t });
-        
+
         if (teamTableBody) {
           const row = document.createElement('tr');
-          
+
           let badgeClass = 'user';
           if (t.rank === 'Owner') badgeClass = 'owner';
           if (t.rank === 'Manager') badgeClass = 'manager';
@@ -765,7 +763,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Delete Event ---
 
-  window.deleteEvent = async function(id) {
+  window.deleteEvent = async function (id) {
     const evt = eventsList.find(e => e.id === id);
     const name = evt ? evt.name : 'الفعالية';
 
@@ -782,7 +780,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Event Attendees & Smart Pricing Modal Management ---
 
-  window.openEventAttendeesModal = function(eventId) {
+  window.openEventAttendeesModal = function (eventId) {
     const evt = eventsList.find(e => e.id === eventId);
     if (!evt) return;
 
@@ -1041,7 +1039,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       // Format extra tasks
       let extraTasksHTML = '<span style="color: var(--text-muted);">-</span>';
       if (att.extraTasks && att.extraTasks.length > 0) {
-        extraTasksHTML = att.extraTasks.map(t => 
+        extraTasksHTML = att.extraTasks.map(t =>
           `<span style="display: block; font-size: 11px; color: var(--accent-mustard);">• ${escapeHTML(t.description)} (${t.amount} ج.م)</span>`
         ).join('');
       }
@@ -1070,7 +1068,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Remove Attendee from Event
-  window.removeAttendeeFromEvent = async function(eventId, memberId) {
+  window.removeAttendeeFromEvent = async function (eventId, memberId) {
     const evt = eventsList.find(e => e.id === eventId);
     if (!evt) return;
 
@@ -1229,7 +1227,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (item.rank === 'Team Leader') badgeClass = 'teamleader';
       if (item.rank === 'Organizer') badgeClass = 'organizer';
 
-      const statusBadge = isPaid 
+      const statusBadge = isPaid
         ? `<span class="badge-paid-status paid"><i class="fa-solid fa-circle-check"></i> تم الدفع</span>`
         : `<span class="badge-paid-status pending"><i class="fa-regular fa-clock"></i> قيد الانتظار</span>`;
 
@@ -1282,7 +1280,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Toggle "تم الدفع" Status in Firestore
-  window.toggleMemberPaidStatus = async function(monthKey, memberId, isChecked) {
+  window.toggleMemberPaidStatus = async function (monthKey, memberId, isChecked) {
     const settlementDocId = `${monthKey}_${memberId}`;
     try {
       const docRef = doc(db, "settlements", settlementDocId);
@@ -1303,7 +1301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Member Breakdown Modal ---
 
-  window.openMemberBreakdownModal = function(memberId, monthKey) {
+  window.openMemberBreakdownModal = function (memberId, monthKey) {
     const member = teamMembers.find(t => t.id === memberId);
     if (!member) return;
 
@@ -1418,7 +1416,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // --- Arabic PDF Statement Generation (Table-Based Layout, NO Flexbox/Grid, Robust RTL) ---
 
-  window.generateMemberStatementPDF = function(memberId, monthKey) {
+  window.generateMemberStatementPDF = function (memberId, monthKey) {
     const member = teamMembers.find(t => t.id === memberId);
     if (!member) {
       showToast("تعذر العثور على بيانات العضو لتوليد الـ PDF.", "danger");
@@ -1489,7 +1487,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     const isPaid = settlementsMap[`${monthKey}_${memberId}`]?.paid || false;
-    const paidBadgeHTML = isPaid 
+    const paidBadgeHTML = isPaid
       ? `<span style="color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">تم سداد المستحقات بالكامل ✓</span>`
       : `<span style="color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">قيد المراجعة والتحويل</span>`;
 
@@ -1627,20 +1625,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       margin: [10, 10, 10, 10],
       filename: `كشف-حساب-${member.name.replace(/\s+/g, '-')}-${monthKey}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { 
-        scale: 2, 
-        useCORS: true, 
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
         letterRendering: true,
         scrollY: 0,
         scrollX: 0
       },
-      jsPDF: { 
-        unit: 'mm', 
-        format: 'a4', 
-        orientation: 'portrait' 
+      jsPDF: {
+        unit: 'mm',
+        format: 'a4',
+        orientation: 'portrait'
       },
-      pagebreak: { 
-        mode: ['avoid-all', 'css', 'legacy'] 
+      pagebreak: {
+        mode: ['avoid-all', 'css', 'legacy']
       }
     };
 
