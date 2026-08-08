@@ -1409,3 +1409,614 @@ body {
     z-index: 1 !important;
   }
 }
+
+/* ==========================================================================
+   NEW MODULES: EVENTS MANAGEMENT & MONTHLY SETTLEMENTS
+   ========================================================================== */
+
+/* Rates group title & grid */
+.rates-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-mustard);
+  margin-top: 15px;
+  margin-bottom: 12px;
+}
+
+.rates-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.btn-secondary-sm {
+  background-color: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  border-radius: var(--border-radius-sm);
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-smooth);
+}
+
+.btn-secondary-sm:hover {
+  background-color: var(--bg-input-focus);
+  color: var(--accent-mustard);
+  border-color: var(--accent-mustard-border);
+}
+
+.btn-action-view {
+  background-color: rgba(228, 179, 99, 0.12);
+  color: var(--accent-mustard);
+  border: 1px solid var(--accent-mustard-border);
+  padding: 6px 12px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: var(--transition-smooth);
+}
+
+.btn-action-view:hover {
+  background-color: var(--accent-mustard);
+  color: var(--text-dark);
+  box-shadow: 0 2px 10px rgba(228, 179, 99, 0.25);
+}
+
+.btn-pdf {
+  background: linear-gradient(135deg, #d7b704 0%, #b89b02 100%);
+  color: #121212 !important;
+  border: none;
+  padding: 7px 14px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 8px rgba(215, 183, 4, 0.2);
+  transition: var(--transition-smooth);
+}
+
+.btn-pdf:hover {
+  background: linear-gradient(135deg, #e0bf04 0%, #d7b704 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(215, 183, 4, 0.35);
+}
+
+/* Monthly Settlements View Styles */
+.settlements-header-card {
+  background-color: var(--bg-card);
+  border: 1px solid rgba(228, 179, 99, 0.2);
+  border-radius: var(--border-radius-lg);
+  padding: 25px 30px;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  box-shadow: var(--shadow-subtle);
+}
+
+.settlements-subtitle {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.month-filter-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.month-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.month-picker-input {
+  max-width: 220px;
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  border-color: var(--accent-mustard-border);
+  color: var(--accent-mustard);
+}
+
+/* Paid Checkbox & Row Highlighting */
+.settlements-table tr.row-paid {
+  background-color: rgba(37, 211, 102, 0.08) !important;
+  border-right: 4px solid #25D366;
+  transition: background-color 0.3s ease, border 0.3s ease;
+}
+
+.settlements-table tr.row-paid td {
+  color: #e6f9ed;
+}
+
+.settlements-table tr.row-paid .stat-total-cell {
+  color: #25D366 !important;
+  font-weight: 800;
+}
+
+.paid-toggle-wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.paid-toggle-input {
+  width: 18px;
+  height: 18px;
+  accent-color: #25D366;
+  cursor: pointer;
+}
+
+.badge-paid-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: var(--border-radius-sm);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-paid-status.paid {
+  background-color: rgba(37, 211, 102, 0.15);
+  color: #25D366;
+  border: 1px solid rgba(37, 211, 102, 0.3);
+}
+
+.badge-paid-status.pending {
+  background-color: rgba(255, 193, 7, 0.12);
+  color: #ffc107;
+  border: 1px solid rgba(255, 193, 7, 0.25);
+}
+
+/* Custom Modals */
+.custom-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.82);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.custom-modal-dialog {
+  background-color: var(--bg-card);
+  border: 1px solid var(--accent-mustard-border);
+  border-radius: var(--border-radius-lg);
+  width: 100%;
+  max-width: 900px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), var(--shadow-glow);
+  overflow: hidden;
+  animation: fadeIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.custom-modal-header {
+  padding: 20px 25px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.modal-subtitle {
+  font-size: 13px;
+  color: var(--accent-mustard);
+  font-weight: 600;
+  display: block;
+  margin-top: 4px;
+}
+
+.modal-close-btn {
+  background: none;
+  border: none;
+  font-size: 30px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: var(--transition-smooth);
+}
+
+.modal-close-btn:hover {
+  color: #ff5252;
+  background-color: rgba(255, 82, 82, 0.1);
+}
+
+.custom-modal-body {
+  padding: 25px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+/* Event Rates Info Banner inside modal */
+.event-rates-banner {
+  background: rgba(228, 179, 99, 0.08);
+  border: 1px solid var(--accent-mustard-border);
+  border-radius: var(--border-radius-md);
+  padding: 14px 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  font-size: 13px;
+}
+
+.event-rates-banner .rate-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.event-rates-banner .rate-pill strong {
+  color: var(--accent-mustard);
+  font-size: 15px;
+}
+
+/* Add Attendee Card */
+.add-attendee-card {
+  background-color: var(--bg-input);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--border-radius-md);
+  padding: 22px;
+  margin-bottom: 25px;
+}
+
+.attendee-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 16px;
+  color: var(--text-primary);
+}
+
+.attendee-inputs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.smart-pricing-tag {
+  font-size: 11px;
+  background-color: rgba(228, 179, 99, 0.15);
+  color: var(--accent-mustard);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 6px;
+  font-weight: 600;
+}
+
+/* Dynamic Custom Extra Tasks */
+.extra-tasks-section {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: var(--border-radius-sm);
+  padding: 15px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  margin-bottom: 18px;
+}
+
+.extra-tasks-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.extra-tasks-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.extra-task-row {
+  display: grid;
+  grid-template-columns: 1fr 130px 42px;
+  gap: 10px;
+  align-items: center;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.btn-remove-task {
+  background: rgba(255, 82, 82, 0.1);
+  border: 1px solid rgba(255, 82, 82, 0.25);
+  color: #ff5252;
+  height: 44px;
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-smooth);
+}
+
+.btn-remove-task:hover {
+  background: #ff5252;
+  color: white;
+}
+
+.attendee-calc-preview {
+  background: rgba(228, 179, 99, 0.12);
+  border-radius: var(--border-radius-sm);
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 1px solid var(--accent-mustard-border);
+}
+
+.live-net-value {
+  font-size: 20px;
+  color: var(--accent-mustard);
+  font-weight: 800;
+}
+
+/* Breakdown Modal Styles */
+.member-info-card {
+  background: var(--bg-input);
+  border-radius: var(--border-radius-md);
+  padding: 18px 22px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.member-info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.member-info-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.member-info-val {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.breakdown-summary-card {
+  margin-top: 20px;
+  background: rgba(228, 179, 99, 0.08);
+  border: 1px solid var(--accent-mustard-border);
+  border-radius: var(--border-radius-md);
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.breakdown-summary-total {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--accent-mustard);
+}
+
+/* ==========================================================================
+   ARABIC PDF STATEMENT PRINT LAYOUT STYLES (High Fidelity Cairo / Gold & Black)
+   ========================================================================== */
+.pdf-statement-page {
+  width: 760px;
+  margin: 0 auto;
+  padding: 30px;
+  background: #ffffff;
+  color: #121212;
+  font-family: 'Cairo', sans-serif;
+  box-sizing: border-box;
+}
+
+.pdf-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 3px solid #d7b704;
+  padding-bottom: 20px;
+  margin-bottom: 25px;
+}
+
+.pdf-brand-logo {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.pdf-brand-logo img {
+  height: 60px;
+  width: auto;
+}
+
+.pdf-brand-text h1 {
+  font-size: 24px;
+  font-weight: 900;
+  color: #121212;
+  margin: 0;
+}
+
+.pdf-brand-text span {
+  color: #d7b704;
+}
+
+.pdf-brand-text p {
+  font-size: 12px;
+  color: #555555;
+  margin: 2px 0 0 0;
+}
+
+.pdf-meta-box {
+  text-align: left;
+  font-size: 13px;
+}
+
+.pdf-meta-box .doc-title {
+  font-size: 18px;
+  font-weight: 800;
+  color: #d7b704;
+  margin-bottom: 4px;
+}
+
+.pdf-meta-box .doc-date {
+  color: #666666;
+}
+
+.pdf-member-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 25px;
+}
+
+.pdf-info-cell {
+  display: flex;
+  flex-direction: column;
+}
+
+.pdf-info-cell .cell-lbl {
+  font-size: 11px;
+  color: #777777;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.pdf-info-cell .cell-val {
+  font-size: 14px;
+  color: #121212;
+  font-weight: 700;
+}
+
+.pdf-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 25px;
+}
+
+.pdf-table th {
+  background-color: #1a1a1a;
+  color: #d7b704;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 10px 12px;
+  text-align: right;
+  border: 1px solid #333333;
+}
+
+.pdf-table td {
+  font-size: 12px;
+  padding: 10px 12px;
+  border: 1px solid #dee2e6;
+  color: #333333;
+}
+
+.pdf-table tr:nth-child(even) {
+  background-color: #fcfcfc;
+}
+
+.pdf-summary-box {
+  background: linear-gradient(135deg, #1f1f1f 0%, #121212 100%);
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 20px 25px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  border: 1px solid #d7b704;
+}
+
+.pdf-summary-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.pdf-summary-left .sum-lbl {
+  font-size: 13px;
+  color: #d7b704;
+  font-weight: 600;
+}
+
+.pdf-summary-left .sum-pay {
+  font-size: 12px;
+  color: #cccccc;
+}
+
+.pdf-summary-right {
+  text-align: left;
+}
+
+.pdf-grand-total {
+  font-size: 26px;
+  font-weight: 900;
+  color: #d7b704;
+}
+
+.pdf-footer-stamp {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  border-top: 1px dashed #cccccc;
+  padding-top: 20px;
+  margin-top: 30px;
+  font-size: 12px;
+  color: #666666;
+}
+
+.pdf-signature-area {
+  text-align: center;
+  width: 180px;
+}
+
+.pdf-signature-line {
+  border-bottom: 1px solid #121212;
+  height: 40px;
+  margin-bottom: 6px;
+}

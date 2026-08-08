@@ -14,6 +14,8 @@
     rel="stylesheet">
   <!-- Core Stylesheet -->
   <link rel="stylesheet" href="style.css">
+  <!-- html2pdf.js for Arabic RTL PDF Statement Generation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
@@ -82,6 +84,19 @@
               <a href="#" class="nav-link" data-target="vault-view">
                 <i class="fa-solid fa-vault"></i>
                 <span>خزنة الرسائل</span>
+              </a>
+            </li>
+            <!-- Events & Monthly Billing Navigation -->
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-target="events-view">
+                <i class="fa-solid fa-calendar-check"></i>
+                <span>الفعاليات والحفلات</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="#" class="nav-link" data-target="settlements-view">
+                <i class="fa-solid fa-file-invoice-dollar"></i>
+                <span>تقفيل الحسابات</span>
               </a>
             </li>
             <!-- Admin Only Items -->
@@ -169,6 +184,20 @@
                   <span class="stat-label">إجمالي الرسائل</span>
                 </div>
               </div>
+              <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="stat-info">
+                  <span class="stat-value" id="stat-events-count">0</span>
+                  <span class="stat-label">إجمالي الفعاليات</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                <div class="stat-info">
+                  <span class="stat-value" id="stat-pending-settlements">0 ج.م</span>
+                  <span class="stat-label">مستحقات الشهر الحالي</span>
+                </div>
+              </div>
               <div class="stat-card admin-only" style="display: none;">
                 <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
                 <div class="stat-info">
@@ -247,7 +276,190 @@
             </div>
           </section>
 
-          <!-- ========== 3. TEAM VIEW (Admin Only) ========== -->
+          <!-- ========== 3. EVENTS MANAGEMENT VIEW ========== -->
+          <section id="events-view" class="view-section">
+            <h2 class="panel-title">إدارة الفعاليات والحفلات</h2>
+
+            <div class="dashboard-grid">
+
+              <!-- Add New Event Form Panel -->
+              <section class="vault-panel">
+                <h3 class="admin-subtitle"><i class="fa-solid fa-calendar-plus" style="margin-left: 8px; color: var(--accent-mustard);"></i>إضافة حفلة جديدة</h3>
+                <form id="add-event-form" novalidate>
+                  <div class="form-group">
+                    <label for="event-name" class="form-label">اسم الحفلة / الفعالية</label>
+                    <input type="text" id="event-name" class="form-input" placeholder="مثال: حفل زفاف فندق الماسة" required>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="event-date" class="form-label">تاريخ الحفلة</label>
+                    <input type="date" id="event-date" class="form-input" required>
+                  </div>
+
+                  <div class="rates-group-title">
+                    <i class="fa-solid fa-coins"></i>
+                    <span>الأجور الأساسية الافتراضية للرتب (ج.م)</span>
+                  </div>
+
+                  <div class="rates-inputs-grid">
+                    <div class="form-group">
+                      <label for="event-manager-rate" class="form-label">أجر المانجر</label>
+                      <div class="input-icon-wrapper">
+                        <input type="number" id="event-manager-rate" class="form-input" placeholder="مثال: 500" min="0" required>
+                        <span class="input-icon">ج.م</span>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="event-teamleader-rate" class="form-label">أجر التيم ليدر</label>
+                      <div class="input-icon-wrapper">
+                        <input type="number" id="event-teamleader-rate" class="form-input" placeholder="مثال: 400" min="0" required>
+                        <span class="input-icon">ج.م</span>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="event-organizer-rate" class="form-label">أجر الأورجانيزر</label>
+                      <div class="input-icon-wrapper">
+                        <input type="number" id="event-organizer-rate" class="form-input" placeholder="مثال: 300" min="0" required>
+                        <span class="input-icon">ج.م</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn-primary" id="add-event-btn">
+                    <i class="fa-solid fa-calendar-plus"></i>
+                    إنشاء وتسجيل الفعالية
+                  </button>
+                </form>
+              </section>
+
+              <!-- Events List Panel -->
+              <section class="vault-panel">
+                <div class="feed-header">
+                  <div class="feed-title-count">
+                    <h3 class="admin-subtitle" style="margin-bottom: 0; border-bottom: none;"><i class="fa-solid fa-list-check" style="margin-left: 8px; color: var(--accent-mustard);"></i>قائمة الفعاليات المسجلة</h3>
+                    <span id="events-count-badge" class="feed-count">0</span>
+                  </div>
+                </div>
+
+                <div class="horizontal-scroll-wrapper table-responsive">
+                  <table class="users-table">
+                    <thead>
+                      <tr>
+                        <th>اسم الحفلة</th>
+                        <th>التاريخ</th>
+                        <th>أسعار الرتب</th>
+                        <th>عدد الحضور</th>
+                        <th>الإجراءات</th>
+                      </tr>
+                    </thead>
+                    <tbody id="events-table-body">
+                      <!-- Event rows will be dynamically injected here -->
+                    </tbody>
+                  </table>
+
+                  <div id="events-empty-state" class="empty-state" style="display: none; padding: 30px;">
+                    <div class="empty-icon"><i class="fa-solid fa-calendar-xmark"></i></div>
+                    <h3 class="empty-title">لا توجد فعاليات مسجلة حالياً</h3>
+                    <p class="empty-desc">أضف فعاليتك الأولى من اللوحة الجانبية لبدء تسجيل الحضور والحسابات.</p>
+                  </div>
+                </div>
+              </section>
+
+            </div>
+          </section>
+
+          <!-- ========== 4. MONTHLY SETTLEMENTS VIEW ========== -->
+          <section id="settlements-view" class="view-section">
+            <div class="settlements-header-card">
+              <div class="settlements-title-box">
+                <h2 class="panel-title" style="margin-bottom: 5px;">تقفيل الحسابات الشهرية</h2>
+                <p class="settlements-subtitle">لوحة التصفية المالية وتوليد كشوف الحسابات المعتمدة</p>
+              </div>
+
+              <!-- Month / Year Selector -->
+              <div class="month-filter-wrapper">
+                <label for="settlement-month-select" class="form-label"><i class="fa-solid fa-calendar-days" style="margin-left: 6px; color: var(--accent-mustard);"></i>اختر شهر التقفيل:</label>
+                <div class="month-filter-controls">
+                  <input type="month" id="settlement-month-select" class="form-input month-picker-input">
+                  <button id="current-month-btn" class="btn-secondary-sm" title="الرجوع للشهر الحالي">الشهر الحالي</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Month Quick Financial Stat Cards -->
+            <div class="stats-grid settlement-stats-grid" style="margin-bottom: 25px;">
+              <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-champagne-glasses"></i></div>
+                <div class="stat-info">
+                  <span class="stat-value" id="settlement-stat-events">0</span>
+                  <span class="stat-label">حفلات الشهر المحدد</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon"><i class="fa-solid fa-users-viewfinder"></i></div>
+                <div class="stat-info">
+                  <span class="stat-value" id="settlement-stat-members">0</span>
+                  <span class="stat-label">أعضاء مستحقين للتصفية</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon" style="color: #ffc107; background: rgba(255, 193, 7, 0.15);"><i class="fa-solid fa-wallet"></i></div>
+                <div class="stat-info">
+                  <span class="stat-value" id="settlement-stat-total">0 ج.م</span>
+                  <span class="stat-label">إجمالي المستحق للسداد</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-icon" style="color: #25D366; background: rgba(37, 211, 102, 0.15);"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="stat-info">
+                  <span class="stat-value" id="settlement-stat-paid">0 ج.م</span>
+                  <span class="stat-label">المبالغ المدفوعة</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Aggregated Monthly Settlement Table -->
+            <section class="vault-panel">
+              <div class="feed-header">
+                <div class="feed-title-count">
+                  <h3 class="admin-subtitle" style="margin-bottom: 0; border-bottom: none;">
+                    <i class="fa-solid fa-table-list" style="margin-left: 8px; color: var(--accent-mustard);"></i>
+                    كشف التقفيل المالي لشهر: <span id="settlement-month-label" class="brand-accent">...</span>
+                  </h3>
+                </div>
+              </div>
+
+              <div class="horizontal-scroll-wrapper table-responsive">
+                <table class="users-table settlements-table">
+                  <thead>
+                    <tr>
+                      <th>اسم العضو</th>
+                      <th>الرتبة</th>
+                      <th>طريقة الدفع</th>
+                      <th>رقم الحساب / المحفظة</th>
+                      <th>عدد الحفلات</th>
+                      <th>إجمالي المستحق</th>
+                      <th>حالة الدفع</th>
+                      <th>الإجراءات</th>
+                    </tr>
+                  </thead>
+                  <tbody id="settlements-table-body">
+                    <!-- Dynamic Settlement Rows Injected Here -->
+                  </tbody>
+                </table>
+
+                <div id="settlements-empty-state" class="empty-state" style="display: none; padding: 40px;">
+                  <div class="empty-icon"><i class="fa-solid fa-file-circle-xmark"></i></div>
+                  <h3 class="empty-title">لا توجد مستحقات أو حفلات لهذا الشهر</h3>
+                  <p class="empty-desc">قم بتسجيل فعاليات وحضور أعضاء في هذا الشهر لتظهر الحسابات تلقائياً هنا.</p>
+                </div>
+              </div>
+            </section>
+          </section>
+
+          <!-- ========== 5. TEAM VIEW (Admin Only) ========== -->
           <section id="team-view" class="view-section admin-only">
             <h2 class="panel-title">إدارة فريق العمل</h2>
 
@@ -335,7 +547,7 @@
             </div>
           </section>
 
-          <!-- ========== 4. SETTINGS VIEW (Admin Only) ========== -->
+          <!-- ========== 6. SETTINGS VIEW (Admin Only) ========== -->
           <section id="settings-view" class="view-section admin-only">
             <h2 class="panel-title">لوحة التحكم للمسؤول (إدارة مستخدمي النظام)</h2>
 
@@ -395,6 +607,172 @@
         </div>
       </main>
 
+    </div>
+  </div>
+
+  <!-- ==================== MODALS & POPUPS ==================== -->
+
+  <!-- 1. Event Attendees & Smart Pricing Modal -->
+  <div id="event-attendees-modal" class="custom-modal-backdrop" style="display: none;">
+    <div class="custom-modal-dialog">
+      <div class="custom-modal-header">
+        <div>
+          <h3 class="modal-title" id="modal-event-title">إدارة حضور الحفلة</h3>
+          <span class="modal-subtitle" id="modal-event-meta">...</span>
+        </div>
+        <button class="modal-close-btn" id="close-attendees-modal-btn" title="إغلاق">&times;</button>
+      </div>
+
+      <div class="custom-modal-body">
+        <!-- Event Standard Rates Info Bar -->
+        <div class="event-rates-banner" id="modal-rates-banner">
+          <!-- Filled dynamically with event rates -->
+        </div>
+
+        <!-- Add Attendee Section -->
+        <div class="add-attendee-card">
+          <h4 class="attendee-card-title"><i class="fa-solid fa-user-plus" style="margin-left: 6px; color: var(--accent-mustard);"></i>إضافة عضو للحضور</h4>
+          
+          <form id="add-attendee-form" novalidate>
+            <div class="attendee-inputs-grid">
+              <!-- Select Team Member -->
+              <div class="form-group" style="grid-column: span 2;">
+                <label for="attendee-select" class="form-label">اختر العضو من الفريق</label>
+                <select id="attendee-select" class="form-select" required>
+                  <option value="" disabled selected>اختر عضو الفريق...</option>
+                </select>
+              </div>
+
+              <!-- Base Rate (Auto-filled by smart pricing, editable) -->
+              <div class="form-group">
+                <label for="attendee-base-rate" class="form-label">
+                  الأجر الأساسي (ج.م)
+                  <span class="smart-pricing-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> تسعير ذكي</span>
+                </label>
+                <input type="number" id="attendee-base-rate" class="form-input" min="0" placeholder="0" required>
+              </div>
+
+              <!-- Bonus -->
+              <div class="form-group">
+                <label for="attendee-bonus" class="form-label">بونص (ج.م)</label>
+                <input type="number" id="attendee-bonus" class="form-input" min="0" placeholder="0" value="0">
+              </div>
+
+              <!-- Deductions -->
+              <div class="form-group">
+                <label for="attendee-deductions" class="form-label">خصومات (ج.م)</label>
+                <input type="number" id="attendee-deductions" class="form-input" min="0" placeholder="0" value="0">
+              </div>
+            </div>
+
+            <!-- Dynamic Custom Extra Tasks (مهام إضافية) -->
+            <div class="extra-tasks-section">
+              <div class="extra-tasks-header">
+                <label class="form-label" style="margin-bottom: 0;"><i class="fa-solid fa-list-check" style="margin-left: 6px; color: var(--accent-mustard);"></i>مهام إضافية (مواصلات زيادة، شغل إضافي...):</label>
+                <button type="button" id="add-extra-task-btn" class="btn-secondary-sm">
+                  <i class="fa-solid fa-plus"></i> إضافة مهمة
+                </button>
+              </div>
+
+              <div id="extra-tasks-container" class="extra-tasks-container">
+                <!-- Dynamic Task input rows will be appended here -->
+              </div>
+            </div>
+
+            <!-- Live Net Preview for this attendee -->
+            <div class="attendee-calc-preview">
+              <span>صافي المستحق للعضو في هذه الحفلة:</span>
+              <strong id="attendee-live-net" class="live-net-value">0 ج.م</strong>
+            </div>
+
+            <button type="submit" class="btn-primary" style="margin-top: 15px;">
+              <i class="fa-solid fa-check"></i>
+              حفظ وتأكيد حضور العضو
+            </button>
+          </form>
+        </div>
+
+        <!-- Current Attendees Table in this event -->
+        <div class="event-attendees-list-section">
+          <h4 class="attendee-card-title" style="margin-top: 25px;">
+            <i class="fa-solid fa-users" style="margin-left: 6px; color: var(--accent-mustard);"></i>
+            الأعضاء الحاضرون في هذه الحفلة (<span id="modal-attendees-count">0</span>)
+          </h4>
+
+          <div class="horizontal-scroll-wrapper table-responsive">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>اسم العضو</th>
+                  <th>الرتبة</th>
+                  <th>الأجر الأساسي</th>
+                  <th>بونص</th>
+                  <th>خصومات</th>
+                  <th>مهام إضافية</th>
+                  <th>الصافي</th>
+                  <th>الإجراءات</th>
+                </tr>
+              </thead>
+              <tbody id="modal-attendees-table-body">
+                <!-- Injected dynamically -->
+              </tbody>
+            </table>
+
+            <div id="modal-attendees-empty" class="empty-state" style="padding: 20px; display: none;">
+              <p class="empty-desc">لم يتم تسجيل أي حضور في هذه الفعالية بعد.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Member Monthly Events Breakdown Modal -->
+  <div id="member-breakdown-modal" class="custom-modal-backdrop" style="display: none;">
+    <div class="custom-modal-dialog">
+      <div class="custom-modal-header">
+        <div>
+          <h3 class="modal-title" id="breakdown-member-title">تفاصيل كشف الحساب</h3>
+          <span class="modal-subtitle" id="breakdown-month-meta">...</span>
+        </div>
+        <button class="modal-close-btn" id="close-breakdown-modal-btn" title="إغلاق">&times;</button>
+      </div>
+
+      <div class="custom-modal-body">
+        <div class="member-info-card" id="breakdown-member-info">
+          <!-- Member details filled dynamically -->
+        </div>
+
+        <div class="horizontal-scroll-wrapper table-responsive" style="margin-top: 20px;">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>اسم الحفلة</th>
+                <th>التاريخ</th>
+                <th>الأجر الأساسي</th>
+                <th>البونص</th>
+                <th>الخصومات</th>
+                <th>المهام الإضافية</th>
+                <th>الصافي للحفلة</th>
+              </tr>
+            </thead>
+            <tbody id="breakdown-events-table-body">
+              <!-- Injected dynamically -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="breakdown-summary-card" id="breakdown-summary-box">
+          <!-- Summary totals filled dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. HIDDEN ARABIC PDF STATEMENT TEMPLATE ==================== -->
+  <div id="pdf-container-wrapper" style="position: absolute; left: -9999px; top: -9999px; width: 800px; background: #ffffff; color: #121212; font-family: 'Cairo', sans-serif;">
+    <div id="pdf-statement-content" class="pdf-statement-page" dir="rtl">
+      <!-- PDF Template injected dynamically when generating PDF -->
     </div>
   </div>
 
