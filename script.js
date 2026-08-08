@@ -1381,7 +1381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- Arabic PDF Statement Generation (Strict A4, RTL, Cairo Font, Multi-page Pagebreak Support) ---
+  // --- Arabic PDF Statement Generation (Table-Based Layout, NO Flexbox/Grid, Robust RTL) ---
 
   window.generateMemberStatementPDF = function(memberId, monthKey) {
     const member = teamMembers.find(t => t.id === memberId);
@@ -1441,22 +1441,22 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       tableRowsHTML += `
         <tr style="page-break-inside: avoid; break-inside: avoid; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
-          <td style="text-align: center; padding: 9px 4px; border: 1px solid #dcdcdc; font-size: 11px;">${idx + 1}</td>
-          <td style="text-align: right; padding: 9px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111;">${escapeHTML(evt.eventName)}</td>
-          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px;">${escapeHTML(evt.eventDate)}</td>
-          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700;">${evt.baseRate} ج.م</td>
-          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700;">+${evt.bonus} ج.م</td>
-          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700;">-${evt.deductions} ج.م</td>
-          <td style="text-align: right; padding: 9px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b;">${extraTasksString}</td>
-          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 12px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'};">${evt.netAmount} ج.م</td>
+          <td align="center" style="text-align: center; padding: 10px 4px; border: 1px solid #dcdcdc; font-size: 11px; color: #121212;">${idx + 1}</td>
+          <td align="right" style="text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111;">${escapeHTML(evt.eventName)}</td>
+          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #444444;">${escapeHTML(evt.eventDate)}</td>
+          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #121212;">${evt.baseRate} ج.م</td>
+          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700;">+${evt.bonus} ج.م</td>
+          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700;">-${evt.deductions} ج.م</td>
+          <td align="right" style="text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b;">${extraTasksString}</td>
+          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 12px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'};">${evt.netAmount} ج.م</td>
         </tr>
       `;
     });
 
     const isPaid = settlementsMap[`${monthKey}_${memberId}`]?.paid || false;
     const paidBadgeHTML = isPaid 
-      ? `<span style="color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 12px;">تم سداد المستحقات بالكامل ✓</span>`
-      : `<span style="color: #856404; background: #fff3cd; border: 1px solid #ffeeba; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 12px;">قيد المراجعة والتحويل</span>`;
+      ? `<span style="color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">تم سداد المستحقات بالكامل ✓</span>`
+      : `<span style="color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">قيد المراجعة والتحويل</span>`;
 
     const nowFormatted = new Date().toLocaleDateString('ar-EG', {
       year: 'numeric',
@@ -1464,64 +1464,84 @@ document.addEventListener('DOMContentLoaded', async () => {
       day: 'numeric'
     });
 
+    // Pure Table-Based Layout: Absolute Ban on Flexbox and Grid
     pdfContentContainer.innerHTML = `
-      <div class="pdf-statement-page" dir="rtl" style="font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; border: 2px solid #1a1a1a; border-radius: 8px; padding: 24px 26px; background: #ffffff; color: #121212;">
-        <!-- Header -->
-        <div class="pdf-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 20px; page-break-inside: avoid;">
-          <div class="pdf-brand-logo" style="display: flex; align-items: center; gap: 14px;">
-            <img src="logo.png" alt="4Directions Logo" style="width: 60px; height: 60px; object-fit: contain;">
-            <div class="pdf-brand-text">
-              <h1 style="font-size: 22px; font-weight: 800; color: #121212; margin: 0 0 2px 0; font-family: 'Cairo', sans-serif;">فور <span style="color: #d7b704;">دايركشنز</span></h1>
-              <p style="font-size: 11px; color: #666666; margin: 0;">4Directions Event Organizers Management</p>
-            </div>
-          </div>
-          <div class="pdf-meta-box" style="text-align: left; direction: ltr;">
-            <div class="doc-title" style="font-size: 15px; font-weight: 800; color: #d7b704; background: #1a1a1a; padding: 4px 12px; border-radius: 4px; display: inline-block; margin-bottom: 6px; direction: rtl; font-family: 'Cairo', sans-serif;">كشف حساب مستحقات مالية</div>
-            <div class="doc-date" style="font-size: 12px; color: #444444; direction: rtl; text-align: right;">شهر: <strong>${getArabicMonthName(monthKey)}</strong></div>
-            <div class="doc-date" style="font-size: 11px; color: #777777; direction: rtl; text-align: right;">تاريخ الإصدار: ${nowFormatted}</div>
-          </div>
-        </div>
+      <div class="pdf-statement-page" dir="rtl" style="font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; border: 2px solid #1a1a1a; border-radius: 8px; padding: 22px 24px; background-color: #ffffff; color: #121212; width: 100%; box-sizing: border-box;">
+        
+        <!-- 1. Header Table (Borderless) -->
+        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 18px; page-break-inside: avoid; break-inside: avoid;">
+          <tr>
+            <td align="right" valign="middle" style="width: 60%; text-align: right; vertical-align: middle;">
+              <table dir="rtl" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
+                <tr>
+                  <td valign="middle" style="vertical-align: middle; padding-left: 12px;">
+                    <img src="logo.png" alt="4Directions" width="55" height="55" style="width: 55px; height: 55px; display: block;">
+                  </td>
+                  <td valign="middle" align="right" style="vertical-align: middle; text-align: right;">
+                    <h1 style="margin: 0 0 2px 0; font-size: 21px; font-weight: 800; color: #121212; font-family: 'Cairo', sans-serif; line-height: 1.3;">فور <span style="color: #d7b704;">دايركشنز</span></h1>
+                    <p style="margin: 0; font-size: 10.5px; color: #666666; font-family: 'Cairo', sans-serif;">4Directions Event Organizers Management</p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+            <td align="left" valign="middle" style="width: 40%; text-align: left; vertical-align: middle; direction: ltr;">
+              <div style="background-color: #1a1a1a; color: #d7b704; font-size: 14px; font-weight: 800; padding: 5px 12px; border-radius: 4px; display: inline-block; font-family: 'Cairo', sans-serif; direction: rtl; text-align: center; margin-bottom: 5px;">
+                كشف حساب مستحقات مالية
+              </div>
+              <p style="margin: 2px 0 0 0; font-size: 11.5px; color: #333333; font-family: 'Cairo', sans-serif; direction: rtl; text-align: left;">
+                عن شهر: <strong style="color: #121212;">${getArabicMonthName(monthKey)}</strong>
+              </p>
+              <p style="margin: 2px 0 0 0; font-size: 10.5px; color: #777777; font-family: 'Cairo', sans-serif; direction: rtl; text-align: left;">
+                تاريخ الإصدار: ${nowFormatted}
+              </p>
+            </td>
+          </tr>
+        </table>
 
-        <!-- Member Details Box -->
-        <div class="pdf-member-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px; background: #fbfbfb; border: 1px solid #e2e2e2; border-right: 4px solid #d7b704; border-radius: 6px; padding: 14px 16px; margin-bottom: 22px; page-break-inside: avoid;">
-          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
-            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">اسم العضو:</span>
-            <span class="cell-val" style="font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.name)}</span>
-          </div>
-          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
-            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">الكود / المعرّف:</span>
-            <span class="cell-val" style="font-family: monospace; font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.code || '-')}</span>
-          </div>
-          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
-            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">الرتبة في الفريق:</span>
-            <span class="cell-val" style="font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.rank || '-')}</span>
-          </div>
-          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
-            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">طريقة الدفع المعتمدة:</span>
-            <span class="cell-val" style="font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.paymentMethod || '-')}</span>
-          </div>
-          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
-            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">رقم الحساب / المحفظة:</span>
-            <span class="cell-val" style="font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.paymentAccount || '-')}</span>
-          </div>
-          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
-            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">حالة السداد:</span>
-            <span class="cell-val">${paidBadgeHTML}</span>
-          </div>
-        </div>
+        <!-- 2. Member Details Table (Borderless 3-Column Table Layout) -->
+        <table dir="rtl" width="100%" border="0" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1px solid #e0e0e0; border-right: 4px solid #d7b704; border-radius: 6px; margin-bottom: 18px; font-family: 'Cairo', sans-serif; page-break-inside: avoid; break-inside: avoid;">
+          <tr>
+            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">اسم العضو:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.name)}</p>
+            </td>
+            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">الكود / المعرّف:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212; font-family: monospace;">${escapeHTML(member.code || '-')}</p>
+            </td>
+            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">الرتبة في الفريق:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.rank || '-')}</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">طريقة الدفع المعتمدة:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.paymentMethod || '-')}</p>
+            </td>
+            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">رقم الحساب / المحفظة:</p>
+              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.paymentAccount || '-')}</p>
+            </td>
+            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
+              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">حالة السداد:</p>
+              <div style="margin: 0;">${paidBadgeHTML}</div>
+            </td>
+          </tr>
+        </table>
 
-        <!-- Breakdown Table -->
-        <table class="pdf-table" dir="rtl" style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 20px; text-align: right; font-family: 'Cairo', sans-serif;">
+        <!-- 3. Main Events Data Table (Fixed Layout, Explicit Column Widths) -->
+        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; margin-bottom: 18px; font-family: 'Cairo', sans-serif; text-align: right;">
           <thead>
-            <tr style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid;">
-              <th style="width: 5%; text-align: center; padding: 10px 4px; font-size: 11px; border: 1px solid #333333;">م</th>
-              <th style="width: 32%; text-align: right; padding: 10px 8px; font-size: 11.5px; border: 1px solid #333333;">اسم الفعالية / الحفلة</th>
-              <th style="width: 13%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333;">التاريخ</th>
-              <th style="width: 11%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333;">الأجر الأساسي</th>
-              <th style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333;">البونص</th>
-              <th style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333;">الخصومات</th>
-              <th style="width: 19%; text-align: right; padding: 10px 8px; font-size: 11px; border: 1px solid #333333;">مهام إضافية</th>
-              <th style="width: 12%; text-align: center; padding: 10px 6px; font-size: 11.5px; border: 1px solid #333333;">صافي الحفلة</th>
+            <tr style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid; break-inside: avoid;">
+              <th align="center" style="width: 5%; text-align: center; padding: 10px 4px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">م</th>
+              <th align="right" style="width: 31%; text-align: right; padding: 10px 8px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff;">اسم الفعالية / الحفلة</th>
+              <th align="center" style="width: 13%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">التاريخ</th>
+              <th align="center" style="width: 11%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">الأجر الأساسي</th>
+              <th align="center" style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">البونص</th>
+              <th align="center" style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">الخصومات</th>
+              <th align="right" style="width: 18%; text-align: right; padding: 10px 8px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">مهام إضافية</th>
+              <th align="center" style="width: 12%; text-align: center; padding: 10px 6px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff;">صافي الحفلة</th>
             </tr>
           </thead>
           <tbody>
@@ -1529,36 +1549,41 @@ document.addEventListener('DOMContentLoaded', async () => {
           </tbody>
         </table>
 
-        <!-- Financial Totals Summary Box -->
-        <div class="pdf-summary-box" style="display: flex; justify-content: space-between; align-items: center; background: #fbfbfb; border: 1.5px solid #1a1a1a; border-radius: 6px; padding: 14px 18px; margin-bottom: 22px; page-break-inside: avoid;">
-          <div class="pdf-summary-left" style="display: flex; flex-direction: column; gap: 4px;">
-            <span class="sum-lbl" style="font-size: 13px; font-weight: 800; color: #1a1a1a;">ملخص العمليات الحسابية:</span>
-            <span class="sum-pay" style="font-size: 11.5px; color: #444444;">
-              الأجور الأساسية (${sumBase} ج.م) + إجمالي البونص (${sumBonus} ج.م) + إضافي (${sumExtra} ج.م) - خصومات (${sumDeductions} ج.م)
-            </span>
-            <span class="sum-pay" style="color: #b8860b; font-weight: 700; font-size: 11.5px; margin-top: 2px;">
-              إجمالي عدد الفعاليات المنفذة: ${attendedEvents.length} فعالية
-            </span>
-          </div>
-          <div class="pdf-summary-right" style="text-align: left; background: #1a1a1a; color: #ffffff; padding: 10px 18px; border-radius: 6px; border-right: 4px solid #d7b704;">
-            <span style="font-size: 12px; color: #dddddd; display: block;">الإجمالي النهائي المستحق:</span>
-            <span class="pdf-grand-total" style="font-size: 20px; font-weight: 900; color: #d7b704; display: block; line-height: 1.3;">${grandTotal} ج.م</span>
-          </div>
-        </div>
+        <!-- 4. Financial Totals Summary (Table-Based, Anti-Squish) -->
+        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1.5px solid #1a1a1a; border-radius: 6px; margin-bottom: 18px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
+          <tr>
+            <td align="right" valign="middle" style="width: 65%; padding: 14px 16px; text-align: right;">
+              <p style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #1a1a1a;">ملخص العمليات الحسابية:</p>
+              <p style="margin: 0 0 4px 0; font-size: 11.5px; color: #444444; line-height: 1.6;">
+                الأجور الأساسية (${sumBase} ج.م) + إجمالي البونص (${sumBonus} ج.م) + إضافي (${sumExtra} ج.م) - خصومات (${sumDeductions} ج.م)
+              </p>
+              <p style="margin: 0; font-size: 11.5px; font-weight: 700; color: #b8860b;">
+                إجمالي عدد الفعاليات المنفذة: ${attendedEvents.length} فعالية
+              </p>
+            </td>
+            <td align="center" valign="middle" style="width: 35%; padding: 14px 16px; background-color: #1a1a1a; color: #ffffff; text-align: center; border-right: 4px solid #d7b704; border-radius: 0 5px 5px 0;">
+              <p style="margin: 0 0 4px 0; font-size: 12px; color: #dddddd; font-family: 'Cairo', sans-serif;">الإجمالي النهائي المستحق:</p>
+              <p style="margin: 0; font-size: 22px; font-weight: 900; color: #d7b704; font-family: 'Cairo', sans-serif; line-height: 1.3;">${grandTotal} ج.م</p>
+            </td>
+          </tr>
+        </table>
 
-        <!-- Stamp and Signatures Footer -->
-        <div class="pdf-footer-stamp" style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 14px; border-top: 1px dashed #cccccc; page-break-inside: avoid;">
-          <div>
-            <strong style="font-size: 12px; color: #1a1a1a;">ملاحظات الإدارة:</strong><br>
-            <span style="font-size: 11px; color: #555555; line-height: 1.5;">
-              يتم تحويل المستحقات بناءً على بيانات الدفع المسجلة أعلاه (${escapeHTML(member.paymentMethod || '')}: ${escapeHTML(member.paymentAccount || '')}).
-            </span>
-          </div>
-          <div class="pdf-signature-area" style="text-align: center; min-width: 180px;">
-            <div class="pdf-signature-line" style="border-bottom: 1.5px dotted #666666; width: 140px; margin: 0 auto 6px auto; height: 35px;"></div>
-            <strong style="font-size: 12px; color: #1a1a1a;">إدارة فور دايركشنز</strong>
-          </div>
-        </div>
+        <!-- 5. Stamp and Signatures Footer Table -->
+        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-top: 1px dashed #cccccc; padding-top: 12px; margin-top: 8px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
+          <tr>
+            <td align="right" valign="bottom" style="width: 65%; padding: 10px 0; text-align: right;">
+              <p style="margin: 0 0 3px 0; font-size: 12px; font-weight: 700; color: #1a1a1a;">ملاحظات الإدارة:</p>
+              <p style="margin: 0; font-size: 11px; color: #555555; line-height: 1.6;">
+                يتم تحويل المستحقات بناءً على بيانات الدفع المسجلة أعلاه (${escapeHTML(member.paymentMethod || '')}: ${escapeHTML(member.paymentAccount || '')}).
+              </p>
+            </td>
+            <td align="center" valign="bottom" style="width: 35%; padding: 10px 0; text-align: center;">
+              <div style="border-bottom: 1.5px dotted #666666; width: 140px; margin: 0 auto 6px auto; height: 35px;"></div>
+              <p style="margin: 0; font-size: 12px; font-weight: 800; color: #1a1a1a;">إدارة فور دايركشنز</p>
+            </td>
+          </tr>
+        </table>
+
       </div>
     `;
 
@@ -1595,491 +1620,4 @@ document.addEventListener('DOMContentLoaded', async () => {
       showToast("مكتبة توليد الـ PDF غير محملة. يرجى إعادة تحديث الصفحة.", "danger");
     }
   };
-
-  // --- Admin User Operations ---
-
-  if (addUserForm) {
-    addUserForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = adminUsernameInput.value.trim();
-      const password = adminPasswordInput.value.trim();
-      const role = adminRoleSelect.value;
-
-      if (!username || !password) {
-        showToast("يرجى ملء كافة البيانات لإنشاء المستخدم.", "danger");
-        return;
-      }
-
-      try {
-        const checkQuery = query(usersCol, where("username", "==", username));
-        const checkSnapshot = await getDocs(checkQuery);
-        
-        if (!checkSnapshot.empty) {
-          showToast("اسم المستخدم هذا مسجل بالفعل في النظام.", "danger");
-          return;
-        }
-
-        await addDoc(usersCol, {
-          username: username,
-          password: password,
-          role: role,
-          createdAt: serverTimestamp()
-        });
-
-        showToast(`تمت إضافة المستخدم "${username}" بنجاح!`, "success");
-        addUserForm.reset();
-      } catch (err) {
-        console.error("Error adding user:", err);
-        showToast("فشل في إضافة المستخدم الجديد.", "danger");
-      }
-    });
-  }
-
-  window.deleteUser = async function(id) {
-    try {
-      const docRef = doc(db, "users", id);
-      const docSnap = await getDoc(docRef);
-
-      if (!docSnap.exists()) {
-        showToast("المستخدم غير موجود.", "danger");
-        return;
-      }
-
-      const targetUsername = docSnap.data().username;
-
-      if (targetUsername === 'admin') {
-        showToast("لا يمكن حذف حساب المسؤول الرئيسي للموقع.", "danger");
-        return;
-      }
-
-      if (confirm(`هل أنت متأكد من حذف حساب المستخدم "${targetUsername}"؟`)) {
-        await deleteDoc(docRef);
-        showToast(`تم حذف حساب المستخدم "${targetUsername}" بنجاح.`, "success");
-      }
-    } catch (err) {
-      console.error("Error deleting user:", err);
-      showToast("فشل في حذف المستخدم.", "danger");
-    }
-  };
-
-  // --- Team Management Operations ---
-
-  async function getNextTeamCode() {
-    try {
-      const snapshot = await getDocs(teamCol);
-      let maxNum = 0;
-
-      snapshot.forEach((docSnap) => {
-        const data = docSnap.data();
-        if (data.code) {
-          const match = data.code.match(/4D-(\d+)/i);
-          if (match && match[1]) {
-            const num = parseInt(match[1], 10);
-            if (!isNaN(num) && num > maxNum) {
-              maxNum = num;
-            }
-          }
-        }
-      });
-
-      const nextNum = maxNum + 1;
-      return `4D-${nextNum}`;
-    } catch (err) {
-      console.error("Error calculating sequential team code:", err);
-      return `4D-1`;
-    }
-  }
-
-  if (addTeamForm) {
-    addTeamForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = teamMemberName.value.trim();
-      const rank = teamMemberRank.value;
-      const phone = teamMemberPhone.value.trim();
-      const paymentMethod = teamMemberPaymentMethod.value;
-      const paymentAccount = teamMemberPaymentAccount.value.trim();
-
-      if (!name || !rank || !phone || !paymentMethod || !paymentAccount) {
-        showToast("يرجى ملء جميع البيانات المطلوبة لعضو الفريق.", "danger");
-        return;
-      }
-
-      const generatedCode = await getNextTeamCode();
-
-      try {
-        await addDoc(teamCol, {
-          name: name,
-          rank: rank,
-          phone: phone,
-          paymentMethod: paymentMethod,
-          paymentAccount: paymentAccount,
-          code: generatedCode,
-          createdAt: serverTimestamp()
-        });
-
-        showToast(`تم إضافة العضو "${name}" بنجاح بالكود ${generatedCode}`, "success");
-        addTeamForm.reset();
-      } catch (err) {
-        console.error("Error adding team member:", err);
-        showToast("فشل في إضافة عضو الفريق.", "danger");
-      }
-    });
-  }
-
-  window.deleteTeamMember = async function(id) {
-    if (confirm(`هل أنت متأكد من إزالة هذا العضو من الفريق؟`)) {
-      try {
-        await deleteDoc(doc(db, "team_members", id));
-        showToast(`تم حذف العضو من الفريق.`, "success");
-      } catch (err) {
-        console.error("Error deleting team member:", err);
-        showToast("فشل في حذف العضو.", "danger");
-      }
-    }
-  };
-
-  // --- Message operations ---
-
-  if (messageForm) {
-    messageForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      
-      const title = titleInput.value.trim();
-      const content = textInput.value; 
-      const pinned = pinInput.checked;
-
-      if (!title || !content.trim()) {
-        showToast('يرجى ملء عنوان الرسالة ومحتواها لحفظها.', 'danger');
-        return;
-      }
-
-      await addMessage(title, content, pinned);
-      
-      messageForm.reset();
-      updateTextareaCounters();
-    });
-  }
-
-  if (textInput) textInput.addEventListener('input', updateTextareaCounters);
-
-  if (searchInput) {
-    searchInput.addEventListener('input', () => {
-      searchQuery = searchInput.value.trim().toLowerCase();
-      
-      if (searchInput.value.length > 0) {
-        clearSearchBtn.style.display = 'block';
-      } else {
-        clearSearchBtn.style.display = 'none';
-      }
-      
-      renderMessages();
-    });
-  }
-
-  if (clearSearchBtn) {
-    clearSearchBtn.addEventListener('click', () => {
-      searchInput.value = '';
-      searchQuery = '';
-      clearSearchBtn.style.display = 'none';
-      searchInput.focus();
-      renderMessages();
-    });
-  }
-
-  if (tabAll) {
-    tabAll.addEventListener('click', () => {
-      setActiveTab(tabAll, 'all');
-    });
-  }
-
-  if (tabPinned) {
-    tabPinned.addEventListener('click', () => {
-      setActiveTab(tabPinned, 'pinned');
-    });
-  }
-
-  function setActiveTab(activeTabEl, filterType) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    activeTabEl.classList.add('active');
-    currentFilter = filterType;
-    renderMessages();
-  }
-
-  function updateTextareaCounters() {
-    if (!textInput || !charCountEl) return;
-    const text = textInput.value;
-    const charCount = text.length;
-    const wordCount = text.trim() === '' ? 0 : text.trim().split(/\s+/).length;
-    charCountEl.textContent = `${charCount} حرف | ${wordCount} كلمة`;
-  }
-
-  async function initializeDefaultAdmin() {
-    try {
-      const snapshot = await getDocs(usersCol);
-      if (snapshot.empty) {
-        await addDoc(usersCol, {
-          username: "admin",
-          password: "admin123",
-          role: "admin",
-          createdAt: serverTimestamp()
-        });
-        console.log("Default admin account created in Firestore: admin / admin123");
-      }
-    } catch (err) {
-      console.error("Initialization check error:", err);
-    }
-  }
-
-  async function addMessage(title, content, pinned) {
-    try {
-      await addDoc(messagesCol, {
-        title: title,
-        content: content,
-        pinned: pinned,
-        timestamp: serverTimestamp()
-      });
-      showToast('تم حفظ الرسالة بنجاح في المخزن!', 'success');
-    } catch (err) {
-      console.error("Error adding message:", err);
-      showToast('فشل في حفظ الرسالة في قاعدة البيانات.', 'danger');
-    }
-  }
-
-  window.deleteMessage = function(id) {
-    const message = messages.find(m => m.id === id);
-    if (!message) return;
-
-    const messageTitle = message.title;
-    
-    const cardEl = document.querySelector(`.message-card[data-id="${id}"]`);
-    if (cardEl) {
-      cardEl.style.opacity = '0';
-      cardEl.style.transform = 'scale(0.9) translateY(10px)';
-      cardEl.style.transition = 'all 0.3s ease-out';
-    }
-
-    setTimeout(async () => {
-      try {
-        const docRef = doc(db, "messages", id);
-        await deleteDoc(docRef);
-        showToast(`تم حذف الرسالة "${messageTitle}" بنجاح.`, 'danger');
-      } catch (err) {
-        console.error("Error deleting message:", err);
-        showToast('فشل في حذف الرسالة من قاعدة البيانات.', 'danger');
-        if (cardEl) {
-          cardEl.style.opacity = '1';
-          cardEl.style.transform = 'none';
-        }
-      }
-    }, 300);
-  };
-
-  window.togglePin = async function(id) {
-    const message = messages.find(m => m.id === id);
-    if (!message) return;
-
-    const newPinnedState = !message.pinned;
-    try {
-      const docRef = doc(db, "messages", id);
-      await updateDoc(docRef, { pinned: newPinnedState });
-      
-      const statusText = newPinnedState ? 'تم تثبيتها في الأعلى' : 'تم إلغاء التثبيت';
-      showToast(`"${message.title}" ${statusText}.`, 'info');
-    } catch (err) {
-      console.error("Error updating pin state:", err);
-      showToast('فشل في تعديل حالة تثبيت الرسالة.', 'danger');
-    }
-  };
-
-  window.copyMessageText = async function(id, buttonEl) {
-    const message = messages.find(m => m.id === id);
-    if (!message) return;
-
-    try {
-      await navigator.clipboard.writeText(message.content);
-      applyCopyFeedback(buttonEl, message.title);
-    } catch (err) {
-      const textarea = document.createElement('textarea');
-      textarea.value = message.content;
-      textarea.style.position = 'fixed';
-      textarea.style.top = '0';
-      textarea.style.left = '0';
-      textarea.style.opacity = '0';
-      document.body.appendChild(textarea);
-      textarea.select();
-      
-      try {
-        const success = document.execCommand('copy');
-        if (success) {
-          applyCopyFeedback(buttonEl, message.title);
-        } else {
-          showToast('تعذر نسخ محتوى الرسالة.', 'danger');
-        }
-      } catch (fallbackErr) {
-        showToast('تعذر النسخ. يرجى التحديد والنسخ يدوياً.', 'danger');
-      }
-      document.body.removeChild(textarea);
-    }
-  };
-
-  function applyCopyFeedback(buttonEl, title) {
-    const originalHTML = buttonEl.innerHTML;
-    buttonEl.classList.add('copied');
-    buttonEl.innerHTML = `<i class="fa-solid fa-check"></i> تم النسخ!`;
-    
-    showToast(`تم نسخ "${title}" بالكامل!`, 'success');
-    
-    setTimeout(() => {
-      buttonEl.classList.remove('copied');
-      buttonEl.innerHTML = originalHTML;
-    }, 1500);
-  }
-
-  function renderMessages() {
-    if (!messagesGrid) return;
-    
-    let filtered = messages.filter(msg => {
-      if (currentFilter === 'pinned' && !msg.pinned) {
-        return false;
-      }
-      
-      if (searchQuery) {
-        const titleMatch = msg.title.toLowerCase().includes(searchQuery);
-        const contentMatch = msg.content.toLowerCase().includes(searchQuery);
-        return titleMatch || contentMatch;
-      }
-
-      return true;
-    });
-
-    filtered.sort((a, b) => {
-      if (a.pinned && !b.pinned) return -1;
-      if (!a.pinned && b.pinned) return 1;
-      return new Date(b.createdAt) - new Date(a.createdAt);
-    });
-
-    const existingCards = messagesGrid.querySelectorAll('.message-card');
-    existingCards.forEach(card => card.remove());
-
-    if (messagesCountBadge) messagesCountBadge.textContent = filtered.length;
-
-    if (filtered.length === 0) {
-      if (emptyState) {
-        emptyState.style.display = 'flex';
-        
-        if (searchQuery) {
-          emptyState.querySelector('.empty-title').textContent = 'لا توجد رسائل مطابقة';
-          emptyState.querySelector('.empty-desc').textContent = `لا توجد رسائل تطابق البحث عن "${searchQuery}". حاول مجدداً بكلمة أخرى.`;
-          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-magnifying-glass-minus"></i>';
-        } else if (currentFilter === 'pinned') {
-          emptyState.querySelector('.empty-title').textContent = 'لا توجد رسائل مثبتة';
-          emptyState.querySelector('.empty-desc').textContent = 'لم تقم بتثبيت أي رسالة بعد. اضغط على رمز التثبيت على أي بطاقة لتثبيتها في الأعلى.';
-          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-thumbtack"></i>';
-        } else {
-          emptyState.querySelector('.empty-title').textContent = 'المخزن فارغ حالياً';
-          emptyState.querySelector('.empty-desc').textContent = 'أنشئ قالب رسالة واتساب الأول من اللوحة الجانبية لملء المخزن.';
-          emptyState.querySelector('.empty-icon').innerHTML = '<i class="fa-solid fa-box-open"></i>';
-        }
-      }
-    } else {
-      if (emptyState) emptyState.style.display = 'none';
-
-      filtered.forEach(msg => {
-        const card = document.createElement('article');
-        card.className = `message-card ${msg.pinned ? 'pinned' : ''}`;
-        card.setAttribute('data-id', msg.id);
-        
-        const escapedTitle = escapeHTML(msg.title);
-        const escapedContent = escapeHTML(msg.content);
-
-        card.innerHTML = `
-          <div class="card-header">
-            <h3 class="card-title" title="${escapedTitle}">${escapedTitle}</h3>
-            <div class="card-actions">
-              <button 
-                class="action-btn pin-btn ${msg.pinned ? 'is-pinned' : ''}" 
-                onclick="togglePin('${msg.id}')" 
-                title="${msg.pinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة'}"
-              >
-                <i class="fa-solid fa-thumbtack"></i>
-              </button>
-              <button 
-                class="action-btn delete-btn" 
-                onclick="deleteMessage('${msg.id}')" 
-                title="حذف الرسالة"
-              >
-                <i class="fa-solid fa-trash-can"></i>
-              </button>
-            </div>
-          </div>
-          
-          <div class="card-content">${escapedContent}</div>
-          
-          <div class="card-footer">
-            <button class="btn-copy" onclick="copyMessageText('${msg.id}', this)" title="نسخ محتوى الرسالة">
-              <i class="fa-regular fa-clone"></i> نسخ الرسالة
-            </button>
-          </div>
-        `;
-        
-        messagesGrid.appendChild(card);
-      });
-    }
-  }
-
-  function escapeHTML(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
-
-  function showToast(message, type = 'info') {
-    if (!toastContainer) return;
-
-    const toast = document.createElement('div');
-    toast.className = `toast toast-${type}`;
-    
-    let icon = '<i class="fa-solid fa-circle-info"></i>';
-    if (type === 'success') {
-      icon = '<i class="fa-solid fa-circle-check"></i>';
-    } else if (type === 'danger') {
-      icon = '<i class="fa-solid fa-circle-exclamation"></i>';
-    }
-
-    toast.innerHTML = `
-      <span class="toast-icon">${icon}</span>
-      <span class="toast-message">${message}</span>
-      <button class="toast-close" title="إغلاق التنبيه">&times;</button>
-    `;
-
-    toastContainer.appendChild(toast);
-
-    const timeoutId = setTimeout(() => {
-      removeToast(toast);
-    }, 3500);
-
-    toast.querySelector('.toast-close').addEventListener('click', () => {
-      clearTimeout(timeoutId);
-      removeToast(toast);
-    });
-  }
-
-  function removeToast(toastEl) {
-    toastEl.style.opacity = '0';
-    const width = window.innerWidth;
-    if (width >= 600) {
-      toastEl.style.transform = 'translateX(100%)';
-    } else {
-      toastEl.style.transform = 'translateX(-100%)';
-    }
-    setTimeout(() => {
-      if (toastEl.parentNode === toastContainer) {
-        toastContainer.removeChild(toastEl);
-      }
-    }, 300);
-  }
 });
