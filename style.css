@@ -1411,7 +1411,7 @@ body {
 }
 
 /* ==========================================================================
-   OFFICIAL ARABIC PDF STATEMENT STYLES (STRICT A4, RTL, CAIRO FONT)
+   OFFICIAL ARABIC PDF STATEMENT STYLES (STRICT A4, RTL, CAIRO FONT, PURE TABLE)
    ========================================================================== */
 
 #pdf-container-wrapper {
@@ -1437,217 +1437,28 @@ body {
   text-align: right !important;
   border: 2px solid #1a1a1a !important;
   border-radius: 8px !important;
-  padding: 24px 26px !important;
+  padding: 22px 24px !important;
   box-sizing: border-box !important;
   line-height: 1.75 !important;
 }
 
 /* Page-break avoidance rules */
+.pdf-statement-page table,
 .pdf-statement-page tr,
-.pdf-table tr,
-.pdf-table tbody tr {
+.pdf-statement-page td,
+.pdf-statement-page th {
   page-break-inside: avoid !important;
   break-inside: avoid !important;
 }
 
-.pdf-header,
-.pdf-member-grid,
-.pdf-summary-box,
-.pdf-footer-stamp {
-  page-break-inside: avoid !important;
-  break-inside: avoid !important;
-}
-
-/* Header */
-.pdf-header {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  border-bottom: 2px solid #d7b704 !important;
-  padding-bottom: 14px !important;
-  margin-bottom: 20px !important;
-}
-
-.pdf-brand-logo {
-  display: flex !important;
-  align-items: center !important;
-  gap: 14px !important;
-}
-
-.pdf-brand-logo img {
-  width: 60px !important;
-  height: 60px !important;
-  object-fit: contain !important;
-}
-
-.pdf-brand-text h1 {
-  font-size: 22px !important;
-  font-weight: 800 !important;
-  color: #121212 !important;
-  margin: 0 0 2px 0 !important;
-  line-height: 1.3 !important;
-  font-family: 'Cairo', sans-serif !important;
-}
-
-.pdf-brand-text p {
-  font-size: 11px !important;
-  color: #666666 !important;
-  margin: 0 !important;
-}
-
-.pdf-meta-box {
-  text-align: left !important;
-  direction: ltr !important;
-}
-
-.pdf-meta-box .doc-title {
-  font-size: 16px !important;
-  font-weight: 800 !important;
-  color: #d7b704 !important;
-  background: #1a1a1a !important;
-  padding: 4px 12px !important;
-  border-radius: 4px !important;
-  display: inline-block !important;
-  margin-bottom: 6px !important;
+.pdf-statement-page table {
   direction: rtl !important;
-  font-family: 'Cairo', sans-serif !important;
-}
-
-.pdf-meta-box .doc-date {
-  font-size: 12px !important;
-  color: #444444 !important;
-  line-height: 1.5 !important;
-  direction: rtl !important;
-  text-align: right !important;
-}
-
-/* Member Details Grid */
-.pdf-member-grid {
-  display: grid !important;
-  grid-template-columns: repeat(3, 1fr) !important;
-  gap: 12px 16px !important;
-  background: #fbfbfb !important;
-  border: 1px solid #e2e2e2 !important;
-  border-right: 4px solid #d7b704 !important;
-  border-radius: 6px !important;
-  padding: 14px 16px !important;
-  margin-bottom: 22px !important;
-}
-
-.pdf-info-cell {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-}
-
-.pdf-info-cell .cell-lbl {
-  font-size: 11px !important;
-  font-weight: 700 !important;
-  color: #666666 !important;
-  margin-bottom: 4px !important;
-  line-height: 1.4 !important;
-}
-
-.pdf-info-cell .cell-val {
-  font-size: 13px !important;
-  font-weight: 700 !important;
-  color: #121212 !important;
-  line-height: 1.4 !important;
-}
-
-/* PDF Table - Fixed Layout & Proportions */
-.pdf-table {
-  width: 100% !important;
-  table-layout: fixed !important;
   border-collapse: collapse !important;
-  margin-bottom: 20px !important;
-  direction: rtl !important;
-  text-align: right !important;
+}
+
+.pdf-statement-page p {
+  margin: 0;
   font-family: 'Cairo', sans-serif !important;
-}
-
-.pdf-table thead tr {
-  background-color: #1a1a1a !important;
-  color: #ffffff !important;
-}
-
-.pdf-table th {
-  padding: 10px 8px !important;
-  font-size: 11.5px !important;
-  font-weight: 800 !important;
-  border: 1px solid #333333 !important;
-  line-height: 1.4 !important;
-  vertical-align: middle !important;
-}
-
-.pdf-table td {
-  padding: 9px 8px !important;
-  font-size: 11px !important;
-  color: #1a1a1a !important;
-  border: 1px solid #dcdcdc !important;
-  line-height: 1.5 !important;
-  vertical-align: middle !important;
-  word-wrap: break-word !important;
-  overflow-wrap: break-word !important;
-}
-
-.pdf-table tbody tr:nth-child(even) {
-  background-color: #f9f9f9 !important;
-}
-
-/* Summary Box */
-.pdf-summary-box {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  background: #fbfbfb !important;
-  border: 1.5px solid #1a1a1a !important;
-  border-radius: 6px !important;
-  padding: 14px 18px !important;
-  margin-bottom: 22px !important;
-}
-
-.pdf-summary-left {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-}
-
-.pdf-summary-left .sum-lbl {
-  font-size: 13px !important;
-  font-weight: 800 !important;
-  color: #1a1a1a !important;
-}
-
-.pdf-summary-left .sum-pay {
-  font-size: 11.5px !important;
-  color: #444444 !important;
-}
-
-.pdf-summary-right {
-  text-align: left !important;
-  background: #1a1a1a !important;
-  color: #ffffff !important;
-  padding: 10px 18px !important;
-  border-radius: 6px !important;
-  border-right: 4px solid #d7b704 !important;
-}
-
-.pdf-summary-right .pdf-grand-total {
-  font-size: 20px !important;
-  font-weight: 900 !important;
-  color: #d7b704 !important;
-  display: block !important;
-  line-height: 1.3 !important;
-}
-
-/* Stamp & Signature Footer */
-.pdf-footer-stamp {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: flex-end !important;
-  padding-top: 14px !important;
-  border-top: 1px dashed #cccccc !important;
 }
 
 .pdf-signature-area {
@@ -2235,41 +2046,4 @@ body {
   font-size: 13px;
   color: #d7b704;
   font-weight: 600;
-}
-
-.pdf-summary-left .sum-pay {
-  font-size: 12px;
-  color: #cccccc;
-}
-
-.pdf-summary-right {
-  text-align: left;
-}
-
-.pdf-grand-total {
-  font-size: 26px;
-  font-weight: 900;
-  color: #d7b704;
-}
-
-.pdf-footer-stamp {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  border-top: 1px dashed #cccccc;
-  padding-top: 20px;
-  margin-top: 30px;
-  font-size: 12px;
-  color: #666666;
-}
-
-.pdf-signature-area {
-  text-align: center;
-  width: 180px;
-}
-
-.pdf-signature-line {
-  border-bottom: 1px solid #121212;
-  height: 40px;
-  margin-bottom: 6px;
 }
