@@ -1381,7 +1381,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- Arabic PDF Statement Generation (RTL, Cairo Font, Luxury 4Directions Theme) ---
+  // --- Arabic PDF Statement Generation (Strict A4, RTL, Cairo Font, Multi-page Pagebreak Support) ---
 
   window.generateMemberStatementPDF = function(memberId, monthKey) {
     const member = teamMembers.find(t => t.id === memberId);
@@ -1440,23 +1440,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
 
       tableRowsHTML += `
-        <tr>
-          <td style="text-align: center;">${idx + 1}</td>
-          <td><strong>${escapeHTML(evt.eventName)}</strong></td>
-          <td style="text-align: center;">${escapeHTML(evt.eventDate)}</td>
-          <td style="text-align: center;">${evt.baseRate} ج.م</td>
-          <td style="text-align: center; color: #1e7e34;">+${evt.bonus} ج.م</td>
-          <td style="text-align: center; color: #b02a37;">-${evt.deductions} ج.م</td>
-          <td>${extraTasksString}</td>
-          <td style="text-align: center; font-weight: 800; color: #121212;">${evt.netAmount} ج.م</td>
+        <tr style="page-break-inside: avoid; break-inside: avoid; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
+          <td style="text-align: center; padding: 9px 4px; border: 1px solid #dcdcdc; font-size: 11px;">${idx + 1}</td>
+          <td style="text-align: right; padding: 9px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111;">${escapeHTML(evt.eventName)}</td>
+          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px;">${escapeHTML(evt.eventDate)}</td>
+          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700;">${evt.baseRate} ج.م</td>
+          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700;">+${evt.bonus} ج.م</td>
+          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700;">-${evt.deductions} ج.م</td>
+          <td style="text-align: right; padding: 9px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b;">${extraTasksString}</td>
+          <td style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 12px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'};">${evt.netAmount} ج.م</td>
         </tr>
       `;
     });
 
     const isPaid = settlementsMap[`${monthKey}_${memberId}`]?.paid || false;
     const paidBadgeHTML = isPaid 
-      ? `<span style="color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 4px 10px; border-radius: 4px; font-weight: 700;">تم سداد المستحقات بالكامل ✓</span>`
-      : `<span style="color: #856404; background: #fff3cd; border: 1px solid #ffeeba; padding: 4px 10px; border-radius: 4px; font-weight: 700;">قيد المراجعة والتحويل</span>`;
+      ? `<span style="color: #155724; background: #d4edda; border: 1px solid #c3e6cb; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 12px;">تم سداد المستحقات بالكامل ✓</span>`
+      : `<span style="color: #856404; background: #fff3cd; border: 1px solid #ffeeba; padding: 4px 10px; border-radius: 4px; font-weight: 700; font-size: 12px;">قيد المراجعة والتحويل</span>`;
 
     const nowFormatted = new Date().toLocaleDateString('ar-EG', {
       year: 'numeric',
@@ -1465,108 +1465,123 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     pdfContentContainer.innerHTML = `
-      <!-- Header -->
-      <div class="pdf-header">
-        <div class="pdf-brand-logo">
-          <img src="logo.png" alt="4Directions Logo">
-          <div class="pdf-brand-text">
-            <h1>فور <span style="color: #d7b704;">دايركشنز</span></h1>
-            <p>4Directions Event Organizers Management</p>
+      <div class="pdf-statement-page" dir="rtl" style="font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; border: 2px solid #1a1a1a; border-radius: 8px; padding: 24px 26px; background: #ffffff; color: #121212;">
+        <!-- Header -->
+        <div class="pdf-header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 20px; page-break-inside: avoid;">
+          <div class="pdf-brand-logo" style="display: flex; align-items: center; gap: 14px;">
+            <img src="logo.png" alt="4Directions Logo" style="width: 60px; height: 60px; object-fit: contain;">
+            <div class="pdf-brand-text">
+              <h1 style="font-size: 22px; font-weight: 800; color: #121212; margin: 0 0 2px 0; font-family: 'Cairo', sans-serif;">فور <span style="color: #d7b704;">دايركشنز</span></h1>
+              <p style="font-size: 11px; color: #666666; margin: 0;">4Directions Event Organizers Management</p>
+            </div>
+          </div>
+          <div class="pdf-meta-box" style="text-align: left; direction: ltr;">
+            <div class="doc-title" style="font-size: 15px; font-weight: 800; color: #d7b704; background: #1a1a1a; padding: 4px 12px; border-radius: 4px; display: inline-block; margin-bottom: 6px; direction: rtl; font-family: 'Cairo', sans-serif;">كشف حساب مستحقات مالية</div>
+            <div class="doc-date" style="font-size: 12px; color: #444444; direction: rtl; text-align: right;">شهر: <strong>${getArabicMonthName(monthKey)}</strong></div>
+            <div class="doc-date" style="font-size: 11px; color: #777777; direction: rtl; text-align: right;">تاريخ الإصدار: ${nowFormatted}</div>
           </div>
         </div>
-        <div class="pdf-meta-box">
-          <div class="doc-title">كشف حساب مستحقات مالية</div>
-          <div class="doc-date">شهر: <strong>${getArabicMonthName(monthKey)}</strong></div>
-          <div class="doc-date" style="font-size: 11px;">تاريخ الإصدار: ${nowFormatted}</div>
-        </div>
-      </div>
 
-      <!-- Member Details Box -->
-      <div class="pdf-member-grid">
-        <div class="pdf-info-cell">
-          <span class="cell-lbl">اسم العضو:</span>
-          <span class="cell-val">${escapeHTML(member.name)}</span>
+        <!-- Member Details Box -->
+        <div class="pdf-member-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px 18px; background: #fbfbfb; border: 1px solid #e2e2e2; border-right: 4px solid #d7b704; border-radius: 6px; padding: 14px 16px; margin-bottom: 22px; page-break-inside: avoid;">
+          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
+            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">اسم العضو:</span>
+            <span class="cell-val" style="font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.name)}</span>
+          </div>
+          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
+            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">الكود / المعرّف:</span>
+            <span class="cell-val" style="font-family: monospace; font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.code || '-')}</span>
+          </div>
+          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
+            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">الرتبة في الفريق:</span>
+            <span class="cell-val" style="font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.rank || '-')}</span>
+          </div>
+          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
+            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">طريقة الدفع المعتمدة:</span>
+            <span class="cell-val" style="font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.paymentMethod || '-')}</span>
+          </div>
+          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
+            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">رقم الحساب / المحفظة:</span>
+            <span class="cell-val" style="font-size: 13px; font-weight: 700; color: #121212;">${escapeHTML(member.paymentAccount || '-')}</span>
+          </div>
+          <div class="pdf-info-cell" style="display: flex; flex-direction: column; gap: 4px;">
+            <span class="cell-lbl" style="font-size: 11px; font-weight: 700; color: #666666; margin-bottom: 4px;">حالة السداد:</span>
+            <span class="cell-val">${paidBadgeHTML}</span>
+          </div>
         </div>
-        <div class="pdf-info-cell">
-          <span class="cell-lbl">الكود / المعرّف:</span>
-          <span class="cell-val" style="font-family: monospace;">${escapeHTML(member.code || '-')}</span>
-        </div>
-        <div class="pdf-info-cell">
-          <span class="cell-lbl">الرتبة في الفريق:</span>
-          <span class="cell-val">${escapeHTML(member.rank || '-')}</span>
-        </div>
-        <div class="pdf-info-cell">
-          <span class="cell-lbl">طريقة الدفع المعتمدة:</span>
-          <span class="cell-val">${escapeHTML(member.paymentMethod || '-')}</span>
-        </div>
-        <div class="pdf-info-cell">
-          <span class="cell-lbl">رقم الحساب / المحفظة:</span>
-          <span class="cell-val">${escapeHTML(member.paymentAccount || '-')}</span>
-        </div>
-        <div class="pdf-info-cell">
-          <span class="cell-lbl">حالة السداد:</span>
-          <span class="cell-val">${paidBadgeHTML}</span>
-        </div>
-      </div>
 
-      <!-- Breakdown Table -->
-      <table class="pdf-table">
-        <thead>
-          <tr>
-            <th style="width: 30px; text-align: center;">م</th>
-            <th>اسم الفعالية / الحفلة</th>
-            <th style="text-align: center;">التاريخ</th>
-            <th style="text-align: center;">الأجر الأساسي</th>
-            <th style="text-align: center;">البونص</th>
-            <th style="text-align: center;">الخصومات</th>
-            <th>مهام إضافية</th>
-            <th style="text-align: center;">صافي الحفلة</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${tableRowsHTML}
-        </tbody>
-      </table>
+        <!-- Breakdown Table -->
+        <table class="pdf-table" dir="rtl" style="width: 100%; table-layout: fixed; border-collapse: collapse; margin-bottom: 20px; text-align: right; font-family: 'Cairo', sans-serif;">
+          <thead>
+            <tr style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid;">
+              <th style="width: 5%; text-align: center; padding: 10px 4px; font-size: 11px; border: 1px solid #333333;">م</th>
+              <th style="width: 32%; text-align: right; padding: 10px 8px; font-size: 11.5px; border: 1px solid #333333;">اسم الفعالية / الحفلة</th>
+              <th style="width: 13%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333;">التاريخ</th>
+              <th style="width: 11%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333;">الأجر الأساسي</th>
+              <th style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333;">البونص</th>
+              <th style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333;">الخصومات</th>
+              <th style="width: 19%; text-align: right; padding: 10px 8px; font-size: 11px; border: 1px solid #333333;">مهام إضافية</th>
+              <th style="width: 12%; text-align: center; padding: 10px 6px; font-size: 11.5px; border: 1px solid #333333;">صافي الحفلة</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRowsHTML}
+          </tbody>
+        </table>
 
-      <!-- Financial Totals Summary Box -->
-      <div class="pdf-summary-box">
-        <div class="pdf-summary-left">
-          <span class="sum-lbl">ملخص العمليات الحسابية:</span>
-          <span class="sum-pay">
-            الأجور الأساسية (${sumBase} ج.م) + إجمالي البونص (${sumBonus} ج.م) + إضافي (${sumExtra} ج.م) - خصومات (${sumDeductions} ج.م)
-          </span>
-          <span class="sum-pay" style="color: #ffd700; margin-top: 4px;">
-            إجمالي عدد الفعاليات المنفذة: ${attendedEvents.length} فعالية
-          </span>
+        <!-- Financial Totals Summary Box -->
+        <div class="pdf-summary-box" style="display: flex; justify-content: space-between; align-items: center; background: #fbfbfb; border: 1.5px solid #1a1a1a; border-radius: 6px; padding: 14px 18px; margin-bottom: 22px; page-break-inside: avoid;">
+          <div class="pdf-summary-left" style="display: flex; flex-direction: column; gap: 4px;">
+            <span class="sum-lbl" style="font-size: 13px; font-weight: 800; color: #1a1a1a;">ملخص العمليات الحسابية:</span>
+            <span class="sum-pay" style="font-size: 11.5px; color: #444444;">
+              الأجور الأساسية (${sumBase} ج.م) + إجمالي البونص (${sumBonus} ج.م) + إضافي (${sumExtra} ج.م) - خصومات (${sumDeductions} ج.م)
+            </span>
+            <span class="sum-pay" style="color: #b8860b; font-weight: 700; font-size: 11.5px; margin-top: 2px;">
+              إجمالي عدد الفعاليات المنفذة: ${attendedEvents.length} فعالية
+            </span>
+          </div>
+          <div class="pdf-summary-right" style="text-align: left; background: #1a1a1a; color: #ffffff; padding: 10px 18px; border-radius: 6px; border-right: 4px solid #d7b704;">
+            <span style="font-size: 12px; color: #dddddd; display: block;">الإجمالي النهائي المستحق:</span>
+            <span class="pdf-grand-total" style="font-size: 20px; font-weight: 900; color: #d7b704; display: block; line-height: 1.3;">${grandTotal} ج.م</span>
+          </div>
         </div>
-        <div class="pdf-summary-right">
-          <span style="font-size: 12px; color: #dddddd; display: block;">الإجمالي النهائي المستحق:</span>
-          <span class="pdf-grand-total">${grandTotal} ج.م</span>
-        </div>
-      </div>
 
-      <!-- Stamp and Signatures Footer -->
-      <div class="pdf-footer-stamp">
-        <div>
-          <strong>ملاحظات الإدارة:</strong><br>
-          <span style="font-size: 11px; color: #555555;">
-            يتم تحويل المستحقات بناءً على بيانات الدفع المسجلة أعلاه (${escapeHTML(member.paymentMethod || '')}: ${escapeHTML(member.paymentAccount || '')}).
-          </span>
-        </div>
-        <div class="pdf-signature-area">
-          <div class="pdf-signature-line"></div>
-          <strong>إدارة فور دايركشنز</strong>
+        <!-- Stamp and Signatures Footer -->
+        <div class="pdf-footer-stamp" style="display: flex; justify-content: space-between; align-items: flex-end; padding-top: 14px; border-top: 1px dashed #cccccc; page-break-inside: avoid;">
+          <div>
+            <strong style="font-size: 12px; color: #1a1a1a;">ملاحظات الإدارة:</strong><br>
+            <span style="font-size: 11px; color: #555555; line-height: 1.5;">
+              يتم تحويل المستحقات بناءً على بيانات الدفع المسجلة أعلاه (${escapeHTML(member.paymentMethod || '')}: ${escapeHTML(member.paymentAccount || '')}).
+            </span>
+          </div>
+          <div class="pdf-signature-area" style="text-align: center; min-width: 180px;">
+            <div class="pdf-signature-line" style="border-bottom: 1.5px dotted #666666; width: 140px; margin: 0 auto 6px auto; height: 35px;"></div>
+            <strong style="font-size: 12px; color: #1a1a1a;">إدارة فور دايركشنز</strong>
+          </div>
         </div>
       </div>
     `;
 
-    // Trigger html2pdf export with Cairo and high-DPI canvas
+    // Strict A4 multi-page configuration with standard margins and avoidance of table row splits
     const opt = {
-      margin: [8, 8, 8, 8],
+      margin: [10, 10, 10, 10],
       filename: `كشف-حساب-${member.name.replace(/\s+/g, '-')}-${monthKey}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true, letterRendering: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      html2canvas: { 
+        scale: 2, 
+        useCORS: true, 
+        letterRendering: true,
+        scrollY: 0,
+        scrollX: 0
+      },
+      jsPDF: { 
+        unit: 'mm', 
+        format: 'a4', 
+        orientation: 'portrait' 
+      },
+      pagebreak: { 
+        mode: ['avoid-all', 'css', 'legacy'] 
+      }
     };
 
     if (window.html2pdf) {
