@@ -1534,7 +1534,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         color: #121212;
         padding: 28px 32px;
         line-height: 1.6;
-        word-spacing: 2px !important;
       ">
 
         <!-- ===== HEADER ===== -->
@@ -1547,7 +1546,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <img src="logo.png" alt="4Directions" style="height:56px; width:auto; display:block;">
                   </td>
                   <td valign="middle" align="right" style="vertical-align:middle; text-align:right;">
-                    <div style="font-size:22px; font-weight:900; color:#121212; line-height:1.2;">فور <span style="color:#f4b400;">دايركشنز</span></div>
+                    <div style="font-size:22px; font-weight:900; color:#121212; line-height:1.2;">فور <span style="color:#d7b704;">دايركشنز</span></div>
                     <div style="font-size:10px; color:#888888; margin-top:3px;">4Directions Event Organizers Management</div>
                   </td>
                 </tr>
@@ -1562,7 +1561,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </table>
 
         <!-- Gold divider line -->
-        <div style="height:3px; background: linear-gradient(to left, #f4b400, #d97b00); border-radius:2px; margin-bottom:22px;"></div>
+        <div style="height:3px; background: linear-gradient(to left, #d7b704, #b89c02); border-radius:2px; margin-bottom:22px;"></div>
 
         <!-- ===== MEMBER INFO SECTION ===== -->
         <div style="background:#f9f9f9; border-radius:8px; padding:18px 22px; margin-bottom:22px;">
@@ -1574,7 +1573,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               </td>
               <td valign="top" style="width:33.33%; padding:6px 10px; vertical-align:top; text-align:right; border-right:2px solid #e0e0e0;">
                 <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">الكود / الرتبة</div>
-                <div style="font-size:14px; font-weight:800; color:#121212;">${memberCode} — ${memberRank}</div>
+                <div style="font-size:14px; font-weight:800; color:#121212;">${memberCode} &nbsp;—&nbsp; ${memberRank}</div>
               </td>
               <td valign="top" style="width:33.33%; padding:6px 0 6px 10px; vertical-align:top; text-align:right; border-right:2px solid #e0e0e0;">
                 <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">حالة السداد</div>
@@ -1603,14 +1602,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         <table dir="rtl" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-bottom:24px; font-family:'Cairo','Tajawal',Arial,sans-serif;">
           <thead>
             <tr style="background-color:#1a1a1a;">
-              <th style="width:4%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">م</th>
-              <th style="width:28%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">اسم الفعالية / الحفلة</th>
-              <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">التاريخ</th>
-              <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">الأجر الأساسي</th>
-              <th style="width:9%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">البونص</th>
-              <th style="width:9%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">الخصومات</th>
-              <th style="width:18%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">مهام إضافية</th>
-              <th style="width:10%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">صافي الحفلة</th>
+              <th style="width:4%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">م</th>
+              <th style="width:28%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">اسم الفعالية / الحفلة</th>
+              <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">التاريخ</th>
+              <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">الأجر الأساسي</th>
+              <th style="width:9%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">البونص</th>
+              <th style="width:9%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">الخصومات</th>
+              <th style="width:18%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">مهام إضافية</th>
+              <th style="width:10%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#d7b704; border:none; line-height:1.4;">صافي الحفلة</th>
             </tr>
           </thead>
           <tbody>
@@ -1626,34 +1625,42 @@ document.addEventListener('DOMContentLoaded', async () => {
               <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; width:100%;">
                 <tr>
                   <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">الأجور الأساسية</td>
-                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#121212; text-align:left; white-space:nowrap;">${sumBase} ج.م</td>
+                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#121212; text-align:left; white-space:nowrap;">${sumBase}&nbsp;ج.م</td>
                 </tr>
                 <tr>
                   <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">إجمالي البونص</td>
-                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#1e7e34; text-align:left; white-space:nowrap;">+${sumBonus} ج.م</td>
+                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#1e7e34; text-align:left; white-space:nowrap;">+${sumBonus}&nbsp;ج.م</td>
                 </tr>
                 <tr>
                   <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">المهام الإضافية</td>
-                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#b8860b; text-align:left; white-space:nowrap;">+${sumExtra} ج.م</td>
+                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#b8860b; text-align:left; white-space:nowrap;">+${sumExtra}&nbsp;ج.م</td>
                 </tr>
                 <tr>
                   <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">الخصومات</td>
-                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#c0392b; text-align:left; white-space:nowrap;">-${sumDeductions} ج.م</td>
+                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#c0392b; text-align:left; white-space:nowrap;">-${sumDeductions}&nbsp;ج.م</td>
                 </tr>
                 <tr>
                   <td colspan="2" style="padding-top:6px;"><div style="height:1px; background:#dddddd;"></div></td>
                 </tr>
                 <tr>
                   <td style="padding:6px 0 0; font-size:11px; color:#555555; text-align:right;">إجمالي الفعاليات</td>
-                  <td style="padding:6px 8px 0; font-size:11px; font-weight:700; color:#121212; text-align:left;">${attendedEvents.length} فعالية</td>
+                  <td style="padding:6px 8px 0; font-size:11px; font-weight:700; color:#121212; text-align:left;">${attendedEvents.length}&nbsp;فعالية</td>
                 </tr>
               </table>
             </td>
-            <td align="center" valign="middle" style="width:45%; text-align:center; vertical-align:middle;">
-              <div style="background:#f4b400; border-radius:10px; padding:20px 16px; display:inline-block; width:85%; box-sizing:border-box; border:1px solid #d9a000;">
-                <div style="font-size:11px; color:#333333; font-weight:700; font-family:'Cairo',sans-serif; margin-bottom:6px;">الإجمالي النهائي المستحق</div>
-                <div style="font-size:28px; font-weight:900; color:#111111; font-family:'Cairo',sans-serif; line-height:1.2;">${grandTotal} ج.م</div>
-              </div>
+            <td align="center" valign="middle" style="width:45%; text-align:center; vertical-align:middle; padding:4px;">
+              <table cellpadding="0" cellspacing="0" border="0" align="center" style="width:88%; margin:0 auto; background-color:#d7b704; border-radius:10px; border-collapse:separate; border:1px solid #c5a703;">
+                <tr>
+                  <td align="center" valign="middle" style="padding:16px 12px 4px 12px; font-size:11px; font-weight:800; color:#111111; font-family:'Cairo',sans-serif; text-align:center; border:none;">
+                    الإجمالي النهائي المستحق
+                  </td>
+                </tr>
+                <tr>
+                  <td align="center" valign="middle" style="padding:0 12px 16px 12px; font-size:26px; font-weight:900; color:#111111; font-family:'Cairo',sans-serif; text-align:center; line-height:1.2; border:none;">
+                    ${grandTotal}&nbsp;ج.م
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
         </table>
