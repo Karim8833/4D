@@ -1436,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- Arabic PDF Statement Generation (Table-Based Layout, NO Flexbox/Grid, Robust RTL) ---
+  // --- Arabic PDF Statement Generation (Table-Based Layout, NO Flexbox/Grid, Robust RTL & Spacing) ---
 
   window.generateMemberStatementPDF = function (memberId, monthKey) {
     const member = teamMembers.find(t => t.id === memberId);
@@ -1456,8 +1456,8 @@ document.addEventListener('DOMContentLoaded', async () => {
           extraTotal = att.extraTasks.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
         }
         attendedEvents.push({
-          eventName: evt.name,
-          eventDate: evt.date,
+          eventName: evt.name || '',
+          eventDate: evt.date || '',
           baseRate: Number(att.baseRate) || 0,
           bonus: Number(att.bonus) || 0,
           deductions: Number(att.deductions) || 0,
@@ -1490,20 +1490,20 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (evt.extraTasks && evt.extraTasks.length > 0) {
         extraTasksString = evt.extraTasks.map(t => {
           sumExtra += (Number(t.amount) || 0);
-          return `${escapeHTML(t.description)} (${t.amount} ج.م)`;
-        }).join(' + ');
+          return `${escapeHTML(t.description)}&nbsp;(${t.amount}&nbsp;ج.م)`;
+        }).join('&nbsp;+&nbsp;');
       }
 
       tableRowsHTML += `
         <tr style="page-break-inside: avoid; break-inside: avoid; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
-          <td align="center" style="text-align: center; padding: 10px 4px; border: 1px solid #dcdcdc; font-size: 11px; color: #121212;">${idx + 1}</td>
-          <td align="right" style="text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111;">${escapeHTML(evt.eventName)}</td>
-          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #444444;">${escapeHTML(evt.eventDate)}</td>
-          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #121212;">${evt.baseRate} ج.م</td>
-          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700;">+${evt.bonus} ج.م</td>
-          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700;">-${evt.deductions} ج.م</td>
-          <td align="right" style="text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b;">${extraTasksString}</td>
-          <td align="center" style="text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 12px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'};">${evt.netAmount} ج.م</td>
+          <td align="center" style="text-align: center; padding: 9px 4px; border: 1px solid #dcdcdc; font-size: 11px; color: #121212;">${idx + 1}</td>
+          <td align="right" style="text-align: right; padding: 9px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111;">${escapeHTML(evt.eventName)}</td>
+          <td align="center" style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #444444;">${escapeHTML(evt.eventDate)}</td>
+          <td align="center" style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #121212;">${evt.baseRate}&nbsp;ج.م</td>
+          <td align="center" style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700;">+${evt.bonus}&nbsp;ج.م</td>
+          <td align="center" style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700;">-${evt.deductions}&nbsp;ج.م</td>
+          <td align="right" style="text-align: right; padding: 9px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b;">${extraTasksString}</td>
+          <td align="center" style="text-align: center; padding: 9px 6px; border: 1px solid #dcdcdc; font-size: 12px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'};">${evt.netAmount}&nbsp;ج.م</td>
         </tr>
       `;
     });
@@ -1519,12 +1519,12 @@ document.addEventListener('DOMContentLoaded', async () => {
       day: 'numeric'
     });
 
-    // Pure Table-Based Layout: Absolute Ban on Flexbox and Grid
+    // Pure Table-Based Layout with Strict Border-Box & Margin Containment
     pdfContentContainer.innerHTML = `
-      <div class="pdf-statement-page" dir="rtl" style="font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; border: 2px solid #1a1a1a; border-radius: 8px; padding: 22px 24px; background-color: #ffffff; color: #121212; width: 100%; box-sizing: border-box;">
+      <div class="pdf-statement-page" dir="rtl" style="font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; border: 2px solid #1a1a1a; border-radius: 8px; padding: 20px 22px; background-color: #ffffff; color: #121212; width: 96%; max-width: 96%; margin: 0 auto; box-sizing: border-box;">
         
         <!-- 1. Header Table (Borderless) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 18px; page-break-inside: avoid; break-inside: avoid;">
+        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid;">
           <tr>
             <td align="right" valign="middle" style="width: 60%; text-align: right; vertical-align: middle;">
               <table dir="rtl" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
@@ -1544,17 +1544,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 كشف حساب مستحقات مالية
               </div>
               <p style="margin: 2px 0 0 0; font-size: 11.5px; color: #333333; font-family: 'Cairo', sans-serif; direction: rtl; text-align: left;">
-                عن شهر: <strong style="color: #121212;">${getArabicMonthName(monthKey)}</strong>
+                عن شهر:&nbsp;<strong style="color: #121212;">${getArabicMonthName(monthKey)}</strong>
               </p>
               <p style="margin: 2px 0 0 0; font-size: 10.5px; color: #777777; font-family: 'Cairo', sans-serif; direction: rtl; text-align: left;">
-                تاريخ الإصدار: ${nowFormatted}
+                تاريخ الإصدار:&nbsp;${nowFormatted}
               </p>
             </td>
           </tr>
         </table>
 
         <!-- 2. Member Details Table (Borderless 3-Column Table Layout) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1px solid #e0e0e0; border-right: 4px solid #d7b704; border-radius: 6px; margin-bottom: 18px; font-family: 'Cairo', sans-serif; page-break-inside: avoid; break-inside: avoid;">
+        <table dir="rtl" width="100%" border="0" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1px solid #e0e0e0; border-right: 4px solid #d7b704; border-radius: 6px; margin-bottom: 16px; font-family: 'Cairo', sans-serif; page-break-inside: avoid; break-inside: avoid;">
           <tr>
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
               <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">اسم العضو:</p>
@@ -1586,7 +1586,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </table>
 
         <!-- 3. Main Events Data Table (Fixed Layout, Explicit Column Widths) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; margin-bottom: 18px; font-family: 'Cairo', sans-serif; text-align: right;">
+        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; margin-bottom: 16px; font-family: 'Cairo', sans-serif; text-align: right;">
           <thead>
             <tr style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid; break-inside: avoid;">
               <th align="center" style="width: 5%; text-align: center; padding: 10px 4px; font-size: 11px; border: 1px solid #333333; color: #ffffff;">م</th>
@@ -1605,31 +1605,31 @@ document.addEventListener('DOMContentLoaded', async () => {
         </table>
 
         <!-- 4. Financial Totals Summary (Table-Based, Anti-Squish) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1.5px solid #1a1a1a; border-radius: 6px; margin-bottom: 18px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
+        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1.5px solid #1a1a1a; border-radius: 6px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
           <tr>
             <td align="right" valign="middle" style="width: 65%; padding: 14px 16px; text-align: right;">
               <p style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #1a1a1a;">ملخص العمليات الحسابية:</p>
               <p style="margin: 0 0 4px 0; font-size: 11.5px; color: #444444; line-height: 1.6;">
-                الأجور الأساسية (${sumBase} ج.م) + إجمالي البونص (${sumBonus} ج.م) + إضافي (${sumExtra} ج.م) - خصومات (${sumDeductions} ج.م)
+                الأجور الأساسية (${sumBase}&nbsp;ج.م) + إجمالي البونص (${sumBonus}&nbsp;ج.م) + إضافي (${sumExtra}&nbsp;ج.م) - خصومات (${sumDeductions}&nbsp;ج.م)
               </p>
               <p style="margin: 0; font-size: 11.5px; font-weight: 700; color: #b8860b;">
-                إجمالي عدد الفعاليات المنفذة: ${attendedEvents.length} فعالية
+                إجمالي عدد الفعاليات المنفذة:&nbsp;${attendedEvents.length}&nbsp;فعالية
               </p>
             </td>
             <td align="center" valign="middle" style="width: 35%; padding: 14px 16px; background-color: #1a1a1a; color: #ffffff; text-align: center; border-right: 4px solid #d7b704; border-radius: 0 5px 5px 0;">
               <p style="margin: 0 0 4px 0; font-size: 12px; color: #dddddd; font-family: 'Cairo', sans-serif;">الإجمالي النهائي المستحق:</p>
-              <p style="margin: 0; font-size: 22px; font-weight: 900; color: #d7b704; font-family: 'Cairo', sans-serif; line-height: 1.3;">${grandTotal} ج.م</p>
+              <p style="margin: 0; font-size: 22px; font-weight: 900; color: #d7b704; font-family: 'Cairo', sans-serif; line-height: 1.3;">${grandTotal}&nbsp;ج.م</p>
             </td>
           </tr>
         </table>
 
-        <!-- 5. Stamp and Signatures Footer Table -->
-        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-top: 1px dashed #cccccc; padding-top: 12px; margin-top: 8px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
+        <!-- 5. Stamp and Signatures Footer Table (Spaced & Separated Columns) -->
+        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-top: 1px dashed #cccccc; padding-top: 14px; margin-top: 14px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
           <tr>
-            <td align="right" valign="bottom" style="width: 65%; padding: 10px 0; text-align: right;">
-              <p style="margin: 0 0 3px 0; font-size: 12px; font-weight: 700; color: #1a1a1a;">ملاحظات الإدارة:</p>
-              <p style="margin: 0; font-size: 11px; color: #555555; line-height: 1.6;">
-                يتم تحويل المستحقات بناءً على بيانات الدفع المسجلة أعلاه (${escapeHTML(member.paymentMethod || '')}: ${escapeHTML(member.paymentAccount || '')}).
+            <td align="right" valign="top" style="width: 65%; padding: 10px 0; text-align: right;">
+              <p style="margin: 0 0 4px 0; font-size: 12px; font-weight: 700; color: #1a1a1a;">ملاحظات الإدارة:</p>
+              <p style="margin: 0; font-size: 11px; color: #555555; line-height: 1.7;">
+                يتم تحويل المستحقات بناءً على بيانات الدفع المسجلة أعلاه (${escapeHTML(member.paymentMethod || '')}:&nbsp;${escapeHTML(member.paymentAccount || '')}).
               </p>
             </td>
             <td align="center" valign="bottom" style="width: 35%; padding: 10px 0; text-align: center;">
@@ -1644,7 +1644,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Strict A4 multi-page configuration with standard margins and avoidance of table row splits
     const opt = {
-      margin: [10, 10, 10, 10],
+      margin: [5, 5, 5, 5],
       filename: `كشف-حساب-${member.name.replace(/\s+/g, '-')}-${monthKey}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
