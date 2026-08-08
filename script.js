@@ -256,16 +256,17 @@ document.addEventListener('DOMContentLoaded', async () => {
     switchView('home-view');
   }
 
-  // --- 1. Robust Firestore Login Form Submission Handler ---
+  // --- 1. Robust Firestore Login Form Submission Handler (Firebase v9 Modular Syntax) ---
 
   if (loginForm) {
     loginForm.addEventListener('submit', async (e) => {
+      // 1. Prevent default form submission and page refresh
       e.preventDefault();
       
-      const username = loginUsernameInput.value.trim();
-      const password = loginPasswordInput.value.trim();
+      const enteredUser = loginUsernameInput.value.trim();
+      const enteredPass = loginPasswordInput.value.trim();
 
-      if (!username || !password) {
+      if (!enteredUser || !enteredPass) {
         showToast("يرجى إدخال اسم المستخدم وكلمة المرور.", "danger");
         return;
       }
@@ -276,37 +277,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
 
       try {
-        // Query Firestore users collection for matching username and password
-        const authQuery = query(
-          usersCol, 
-          where("username", "==", username), 
-          where("password", "==", password)
+        // 2. Query Firestore 'users' collection using Firebase v9 Modular Syntax
+        const q = query(
+          collection(db, "users"), 
+          where("username", "==", enteredUser), 
+          where("password", "==", enteredPass)
         );
         
-        const querySnapshot = await getDocs(authQuery);
+        const querySnapshot = await getDocs(q);
         
+        // 3. Success State: User document found
         if (!querySnapshot.empty) {
-          const userDoc = querySnapshot.docs[0].data();
-          const role = userDoc.role || 'user';
+          let userRole = 'user';
+          let userName = enteredUser;
+
+          querySnapshot.forEach((doc) => {
+            const userData = doc.data();
+            userRole = userData.role || 'user';
+            userName = userData.username || enteredUser;
+          });
+
+          // Save credentials and role to localStorage for RBAC
+          localStorage.setItem('role', userRole);
+          localStorage.setItem('username', userName);
+          localStorage.setItem('fd_user', JSON.stringify({ username: userName, role: userRole }));
+          sessionStorage.setItem('fd_user', JSON.stringify({ username: userName, role: userRole }));
           
-          // Successful login: save session and redirect to dashboard
-          loginUserSession(userDoc.username, role);
-          showToast(`أهلاً بك مجدداً، ${userDoc.username}!`, "success");
+          // Switch to main dashboard and initialize session views
+          loginUserSession(userName, userRole);
+          showToast(`أهلاً بك مجدداً، ${userName}!`, "success");
           loginForm.reset();
         } else {
-          // Authentication failed: invalid credentials
+          // 4. Error State: No matching user found (Arabic UI Alert)
           console.error("Firestore Login Error: auth/invalid-credentials", "اسم المستخدم أو كلمة المرور غير صحيحة.");
           showToast("اسم المستخدم أو كلمة المرور غير صحيحة", "danger");
         }
       } catch (error) {
-        // Detailed error logging for easy debugging
         console.error("Firestore Login Error:", error.code || "unknown-code", error.message || error);
-        
-        if (error.code === 'unavailable' || error.message?.includes('network')) {
-          showToast("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً", "danger");
-        } else {
-          showToast("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً", "danger");
-        }
+        showToast("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً", "danger");
       } finally {
         // Restore login button state
         loginBtn.disabled = false;
