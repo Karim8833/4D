@@ -1436,7 +1436,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // --- Arabic PDF Statement Generation (Natural Dynamic Wrapping & Stacked Extra Tasks) ---
+  // --- Arabic PDF Statement Generation (Clean Minimalist Corporate Invoice) ---
 
   window.generateMemberStatementPDF = function (memberId, monthKey) {
     const member = teamMembers.find(t => t.id === memberId);
@@ -1486,117 +1486,130 @@ document.addEventListener('DOMContentLoaded', async () => {
       sumDeductions += evt.deductions;
       grandTotal += evt.netAmount;
 
-      let extraTasksString = '-';
+      let extraTasksHTML = '<span style="color:#aaaaaa;">—</span>';
       if (evt.extraTasks && evt.extraTasks.length > 0) {
-        extraTasksString = evt.extraTasks.map(t => {
+        extraTasksHTML = evt.extraTasks.map(t => {
           sumExtra += (Number(t.amount) || 0);
-          return `${escapeHTML(t.description || '')} (${t.amount}&nbsp;ج.م)`;
-        }).join('<br>');
+          return `<span style="display:block; margin-bottom:2px;">${escapeHTML(t.description || '')} <strong style="color:#b8860b;">(${t.amount} ج.م)</strong></span>`;
+        }).join('');
       }
 
+      const rowBg = idx % 2 === 0 ? '#ffffff' : '#fafafa';
       tableRowsHTML += `
-        <tr dir="rtl" style="page-break-inside: avoid; break-inside: avoid; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
-          <td align="center" style="width: 3%; text-align: center; padding: 10px 4px; border: 1px solid #dcdcdc; font-size: 11px; color: #121212; white-space: nowrap;">${idx + 1}</td>
-          <td align="right" style="width: 25%; text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111; white-space: normal; line-height: 1.4;">${escapeHTML(evt.eventName)}</td>
-          <td align="center" style="width: 12%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #444444; white-space: nowrap;">${escapeHTML(evt.eventDate)}</td>
-          <td align="center" style="width: 12%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #121212; white-space: nowrap;">${evt.baseRate}&nbsp;ج.م</td>
-          <td align="center" style="width: 10%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700; white-space: nowrap;">+${evt.bonus}&nbsp;ج.م</td>
-          <td align="center" style="width: 10%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700; white-space: nowrap;">-${evt.deductions}&nbsp;ج.م</td>
-          <td align="right" style="width: 18%; text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b; white-space: normal; line-height: 1.4;">${extraTasksString}</td>
-          <td align="center" style="width: 10%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'}; white-space: nowrap;">${evt.netAmount}&nbsp;ج.م</td>
+        <tr style="background-color:${rowBg}; page-break-inside: avoid;">
+          <td style="padding:15px 8px; border-bottom:1px solid #eeeeee; font-size:11px; color:#888888; text-align:center; vertical-align:top;">${idx + 1}</td>
+          <td style="padding:15px 10px; border-bottom:1px solid #eeeeee; font-size:12px; font-weight:700; color:#121212; text-align:right; vertical-align:top; line-height:1.5;">${escapeHTML(evt.eventName)}</td>
+          <td style="padding:15px 8px; border-bottom:1px solid #eeeeee; font-size:11px; color:#555555; text-align:center; vertical-align:top; white-space:nowrap;">${escapeHTML(evt.eventDate)}</td>
+          <td style="padding:15px 8px; border-bottom:1px solid #eeeeee; font-size:12px; font-weight:700; color:#121212; text-align:center; vertical-align:top; white-space:nowrap;">${evt.baseRate} ج.م</td>
+          <td style="padding:15px 8px; border-bottom:1px solid #eeeeee; font-size:12px; font-weight:700; color:#1e7e34; text-align:center; vertical-align:top; white-space:nowrap;">+${evt.bonus} ج.م</td>
+          <td style="padding:15px 8px; border-bottom:1px solid #eeeeee; font-size:12px; font-weight:700; color:#c0392b; text-align:center; vertical-align:top; white-space:nowrap;">-${evt.deductions} ج.م</td>
+          <td style="padding:15px 10px; border-bottom:1px solid #eeeeee; font-size:11px; color:#b8860b; text-align:right; vertical-align:top; line-height:1.6;">${extraTasksHTML}</td>
+          <td style="padding:15px 8px; border-bottom:1px solid #eeeeee; font-size:13px; font-weight:900; color:#121212; text-align:center; vertical-align:top; white-space:nowrap;">${evt.netAmount} ج.م</td>
         </tr>
       `;
     });
 
     const isPaid = settlementsMap[`${monthKey}_${memberId}`]?.paid || false;
-    const paidBadgeHTML = isPaid
-      ? `<span style="color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">تم سداد المستحقات بالكامل ✓</span>`
-      : `<span style="color: #856404; background-color: #fff3cd; border: 1px solid #ffeeba; padding: 3px 8px; border-radius: 4px; font-weight: 700; font-size: 11.5px; display: inline-block;">قيد المراجعة والتحويل</span>`;
+    const statusText = isPaid ? 'تم السداد بالكامل ✓' : 'قيد المراجعة والتحويل';
+    const statusColor = isPaid ? '#155724' : '#856404';
+    const statusBg = isPaid ? '#d4edda' : '#fff3cd';
 
     const nowFormatted = new Date().toLocaleDateString('ar-EG', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+      year: 'numeric', month: 'long', day: 'numeric'
     });
 
-    // Hardcoded HTML Template: Single Outer Border #222, Distinct <th> Headers, and Clean 5mm Margins
+    const memberName = escapeHTML(member.name || '—');
+    const memberCode = escapeHTML(member.code || '—');
+    const memberRank = escapeHTML(member.rank || '—');
+    const memberPayMethod = escapeHTML(member.paymentMethod || '—');
+    const memberPayAccount = escapeHTML(member.paymentAccount || '—');
+    const monthName = getArabicMonthName(monthKey);
+
     pdfContentContainer.innerHTML = `
-      <div id="pdf-content" dir="rtl" style="width: 100%; box-sizing: border-box; padding: 22px 24px; border: 2px solid #222; font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; background-color: #ffffff; color: #121212; margin: 0; outline: none;">
-        
-        <!-- 1. Header Table (Borderless) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid;">
-          <tr dir="rtl">
-            <td align="right" valign="middle" style="width: 60%; text-align: right; vertical-align: middle;">
-              <table dir="rtl" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
-                <tr dir="rtl">
-                  <td valign="middle" style="vertical-align: middle; padding-left: 12px;">
-                    <img src="logo.png" alt="4Directions" width="55" height="55" style="width: 55px; height: 55px; display: block;">
+      <div dir="rtl" style="
+        width: 100%;
+        box-sizing: border-box;
+        background: #ffffff;
+        font-family: 'Cairo', 'Tajawal', Arial, sans-serif;
+        color: #121212;
+        padding: 28px 32px;
+        line-height: 1.6;
+      ">
+
+        <!-- ===== HEADER ===== -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-bottom:24px;">
+          <tr>
+            <td align="right" valign="middle" style="width:50%; text-align:right; vertical-align:middle;">
+              <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse;">
+                <tr>
+                  <td valign="middle" style="padding-left:14px; vertical-align:middle;">
+                    <img src="logo.png" alt="4Directions" style="height:56px; width:auto; display:block;">
                   </td>
-                  <td valign="middle" align="right" style="vertical-align: middle; text-align: right;">
-                    <h1 style="margin: 0 0 2px 0; font-size: 21px; font-weight: 800; color: #121212; font-family: 'Cairo', sans-serif; line-height: 1.3;">فور&nbsp;<span style="color: #d7b704;">دايركشنز</span></h1>
-                    <p style="margin: 0; font-size: 10.5px; color: #666666; font-family: 'Cairo', sans-serif;">4Directions Event Organizers Management</p>
+                  <td valign="middle" align="right" style="vertical-align:middle; text-align:right;">
+                    <div style="font-size:22px; font-weight:900; color:#121212; line-height:1.2;">فور <span style="color:#f4b400;">دايركشنز</span></div>
+                    <div style="font-size:10px; color:#888888; margin-top:3px;">4Directions Event Organizers Management</div>
                   </td>
                 </tr>
               </table>
             </td>
-            <td align="left" valign="middle" style="width: 40%; text-align: left; vertical-align: middle; direction: ltr;">
-              <div style="background-color: #1a1a1a; color: #d7b704; font-size: 14px; font-weight: 800; padding: 5px 12px; border-radius: 4px; display: inline-block; font-family: 'Cairo', sans-serif; direction: rtl; text-align: center; margin-bottom: 5px;">
-                كشف حساب مستحقات مالية
-              </div>
-              <p style="margin: 2px 0 0 0; font-size: 11.5px; color: #333333; font-family: 'Cairo', sans-serif; direction: rtl; text-align: left;">
-                عن شهر: <strong style="color: #121212;">${getArabicMonthName(monthKey)}</strong>
-              </p>
-              <p style="margin: 2px 0 0 0; font-size: 10.5px; color: #777777; font-family: 'Cairo', sans-serif; direction: rtl; text-align: left;">
-                تاريخ الإصدار: ${nowFormatted}
-              </p>
+            <td align="left" valign="middle" style="width:50%; text-align:left; vertical-align:middle; direction:ltr;">
+              <div style="font-size:18px; font-weight:900; color:#1a1a1a; text-align:right; direction:rtl; line-height:1.3;">كشف حساب مستحقات مالية</div>
+              <div style="font-size:12px; color:#555555; margin-top:5px; text-align:right; direction:rtl;">شهر: <strong style="color:#121212;">${monthName}</strong></div>
+              <div style="font-size:11px; color:#888888; margin-top:3px; text-align:right; direction:rtl;">تاريخ الإصدار: ${nowFormatted}</div>
             </td>
           </tr>
         </table>
 
-        <!-- 2. Member Details Table (Borderless 3-Column Table Layout) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1px solid #e0e0e0; border-right: 4px solid #d7b704; border-radius: 6px; margin-bottom: 16px; font-family: 'Cairo', sans-serif; page-break-inside: avoid; break-inside: avoid;">
-          <tr dir="rtl">
-            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">اسم العضو:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.name)}</p>
-            </td>
-            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">الكود / المعرّف:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212; font-family: monospace;">${escapeHTML(member.code || '-')}</p>
-            </td>
-            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">الرتبة في الفريق:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.rank || '-')}</p>
-            </td>
-          </tr>
-          <tr dir="rtl">
-            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">طريقة الدفع المعتمدة:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.paymentMethod || '-')}</p>
-            </td>
-            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">رقم الحساب / المحفظة:</p>
-              <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${escapeHTML(member.paymentAccount || '-')}</p>
-            </td>
-            <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
-              <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">حالة السداد:</p>
-              <div style="margin: 0;">${paidBadgeHTML}</div>
-            </td>
-          </tr>
-        </table>
+        <!-- Gold divider line -->
+        <div style="height:3px; background: linear-gradient(to left, #f4b400, #d97b00); border-radius:2px; margin-bottom:22px;"></div>
 
-        <!-- 3. Main Events Data Table (Explicit <th> Typography & 100% Proportions) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; margin-bottom: 16px; font-family: 'Cairo', sans-serif; text-align: right;">
+        <!-- ===== MEMBER INFO SECTION ===== -->
+        <div style="background:#f9f9f9; border-radius:8px; padding:18px 22px; margin-bottom:22px;">
+          <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse;">
+            <tr>
+              <td valign="top" style="width:33.33%; padding:6px 10px 6px 0; vertical-align:top; text-align:right;">
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">اسم العضو</div>
+                <div style="font-size:14px; font-weight:800; color:#121212;">${memberName}</div>
+              </td>
+              <td valign="top" style="width:33.33%; padding:6px 10px; vertical-align:top; text-align:right; border-right:2px solid #e0e0e0;">
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">الكود / الرتبة</div>
+                <div style="font-size:14px; font-weight:800; color:#121212;">${memberCode} — ${memberRank}</div>
+              </td>
+              <td valign="top" style="width:33.33%; padding:6px 0 6px 10px; vertical-align:top; text-align:right; border-right:2px solid #e0e0e0;">
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">حالة السداد</div>
+                <div style="font-size:12px; font-weight:800; color:${statusColor}; background:${statusBg}; display:inline-block; padding:3px 10px; border-radius:4px;">${statusText}</div>
+              </td>
+            </tr>
+            <tr>
+              <td colspan="3" style="padding-top:14px; padding-bottom:2px;">
+                <div style="height:1px; background:#e8e8e8;"></div>
+              </td>
+            </tr>
+            <tr>
+              <td valign="top" style="width:33.33%; padding:10px 10px 6px 0; vertical-align:top; text-align:right;">
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">طريقة الدفع</div>
+                <div style="font-size:13px; font-weight:700; color:#121212;">${memberPayMethod}</div>
+              </td>
+              <td valign="top" colspan="2" style="width:66.66%; padding:10px 10px 6px; vertical-align:top; text-align:right; border-right:2px solid #e0e0e0;">
+                <div style="font-size:10px; font-weight:700; color:#888888; margin-bottom:4px;">رقم الحساب / المحفظة</div>
+                <div style="font-size:13px; font-weight:700; color:#121212; font-family:monospace;">${memberPayAccount}</div>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- ===== EVENTS TABLE ===== -->
+        <table dir="rtl" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-bottom:24px; font-family:'Cairo','Tajawal',Arial,sans-serif;">
           <thead>
-            <tr dir="rtl" style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid; break-inside: avoid;">
-              <th align="center" style="width: 3%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">م</th>
-              <th align="right" style="width: 25%; font-size: 11px; padding: 10px 6px; text-align: right; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">اسم الفعالية / الحفلة</th>
-              <th align="center" style="width: 12%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">التاريخ</th>
-              <th align="center" style="width: 12%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">الأجر الأساسي</th>
-              <th align="center" style="width: 10%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">البونص</th>
-              <th align="center" style="width: 10%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">الخصومات</th>
-              <th align="right" style="width: 18%; font-size: 11px; padding: 10px 6px; text-align: right; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">مهام إضافية</th>
-              <th align="center" style="width: 10%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">صافي الحفلة</th>
+            <tr style="background-color:#1a1a1a;">
+              <th style="width:4%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">م</th>
+              <th style="width:28%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">اسم الفعالية / الحفلة</th>
+              <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">التاريخ</th>
+              <th style="width:11%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">الأجر الأساسي</th>
+              <th style="width:9%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">البونص</th>
+              <th style="width:9%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">الخصومات</th>
+              <th style="width:18%; padding:13px 10px; text-align:right; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">مهام إضافية</th>
+              <th style="width:10%; padding:13px 8px; text-align:center; font-size:11px; font-weight:700; color:#f4b400; border:none; line-height:1.4;">صافي الحفلة</th>
             </tr>
           </thead>
           <tbody>
@@ -1604,44 +1617,68 @@ document.addEventListener('DOMContentLoaded', async () => {
           </tbody>
         </table>
 
-        <!-- 4. Financial Totals Summary (Table-Based, Anti-Squish) -->
-        <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1.5px solid #1a1a1a; border-radius: 6px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
-          <tr dir="rtl">
-            <td align="right" valign="middle" style="width: 65%; padding: 14px 16px; text-align: right; vertical-align: middle; white-space: normal;">
-              <p style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #1a1a1a;">ملخص العمليات الحسابية:</p>
-              <p style="margin: 0 0 4px 0; font-size: 11.5px; color: #444444; line-height: 1.6;">
-                الأجور الأساسية (${sumBase}&nbsp;ج.م) + إجمالي البونص (${sumBonus}&nbsp;ج.م) + إضافي (${sumExtra}&nbsp;ج.م) - خصومات (${sumDeductions}&nbsp;ج.م)
-              </p>
-              <p style="margin: 0; font-size: 11.5px; font-weight: 700; color: #b8860b;">
-                إجمالي عدد الفعاليات المنفذة: ${attendedEvents.length} فعالية
-              </p>
+        <!-- ===== FINANCIAL SUMMARY ===== -->
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border-collapse:collapse; margin-bottom:24px;">
+          <tr>
+            <td align="right" valign="top" style="width:55%; text-align:right; vertical-align:top; padding-left:20px;">
+              <div style="font-size:12px; font-weight:800; color:#333333; margin-bottom:10px;">ملخص العمليات الحسابية:</div>
+              <table cellpadding="0" cellspacing="0" border="0" style="border-collapse:collapse; width:100%;">
+                <tr>
+                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">الأجور الأساسية</td>
+                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#121212; text-align:left; white-space:nowrap;">${sumBase} ج.م</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">إجمالي البونص</td>
+                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#1e7e34; text-align:left; white-space:nowrap;">+${sumBonus} ج.م</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">المهام الإضافية</td>
+                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#b8860b; text-align:left; white-space:nowrap;">+${sumExtra} ج.م</td>
+                </tr>
+                <tr>
+                  <td style="padding:4px 0; font-size:11px; color:#555555; text-align:right;">الخصومات</td>
+                  <td style="padding:4px 8px; font-size:11px; font-weight:700; color:#c0392b; text-align:left; white-space:nowrap;">-${sumDeductions} ج.م</td>
+                </tr>
+                <tr>
+                  <td colspan="2" style="padding-top:6px;"><div style="height:1px; background:#dddddd;"></div></td>
+                </tr>
+                <tr>
+                  <td style="padding:6px 0 0; font-size:11px; color:#555555; text-align:right;">إجمالي الفعاليات</td>
+                  <td style="padding:6px 8px 0; font-size:11px; font-weight:700; color:#121212; text-align:left;">${attendedEvents.length} فعالية</td>
+                </tr>
+              </table>
             </td>
-            <td align="center" valign="middle" style="width: 35%; padding: 14px 16px; background-color: #1a1a1a; color: #ffffff; text-align: center; vertical-align: middle; border-right: 4px solid #d7b704; border-radius: 0 5px 5px 0; white-space: nowrap;">
-              <p style="margin: 0 0 4px 0; font-size: 12px; color: #dddddd; font-family: 'Cairo', sans-serif;">الإجمالي النهائي المستحق:</p>
-              <p style="margin: 0; font-size: 22px; font-weight: 900; color: #d7b704; font-family: 'Cairo', sans-serif; line-height: 1.3;">${grandTotal}&nbsp;ج.م</p>
+            <td align="center" valign="middle" style="width:45%; text-align:center; vertical-align:middle;">
+              <div style="background:#1a1a1a; border-radius:10px; padding:20px 16px; display:inline-block; width:85%; box-sizing:border-box;">
+                <div style="font-size:11px; color:#aaaaaa; font-family:'Cairo',sans-serif; margin-bottom:6px;">الإجمالي النهائي المستحق</div>
+                <div style="font-size:28px; font-weight:900; color:#f4b400; font-family:'Cairo',sans-serif; line-height:1.2;">${grandTotal} ج.م</div>
+              </div>
             </td>
           </tr>
         </table>
 
-        <!-- 5. Simplified Notes Footer (No Signature / Dynamic Payment Variables) -->
-        <div style="margin-top: 30px; text-align: right; direction: rtl; font-size: 12px; font-family: 'Cairo', sans-serif; line-height: 1.7; page-break-inside: avoid; white-space: normal;">
-          <strong>ملاحظات الإدارة:</strong> يتم تحويل المستحقات بناءً على بيانات الدفع المسجلة أعلاه.
+        <!-- ===== FOOTER ===== -->
+        <div style="border-top:1px solid #e0e0e0; padding-top:14px; margin-top:8px; text-align:right; direction:rtl;">
+          <span style="font-size:11px; color:#888888;">
+            <strong style="color:#555555;">ملاحظات الإدارة:</strong>
+            يتم تحويل المستحقات بناء على بيانات الدفع المسجلة أعلاه.
+          </span>
         </div>
 
       </div>
     `;
 
-    // Strict A4 multi-page configuration with standard 5mm margin
     const opt = {
-      margin: [10, 10, 10, 10],
-      filename: `كشف-حساب-${member.name.replace(/\s+/g, '-')}-${monthKey}.pdf`,
+      margin: [12, 10, 12, 10],
+      filename: `كشف-حساب-${(member.name || 'member').replace(/\s+/g, '-')}-${monthKey}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
         scale: 2,
         useCORS: true,
         letterRendering: true,
         scrollY: 0,
-        scrollX: 0
+        scrollX: 0,
+        backgroundColor: '#ffffff'
       },
       jsPDF: {
         unit: 'mm',
@@ -1666,6 +1703,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   // --- Message Vault Operations (Add, Render, Copy, Pin, Delete, Counters) ---
+
+
+
 
   function updateTextareaCounters() {
     if (!textInput || !charCountEl) return;
