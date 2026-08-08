@@ -1534,6 +1534,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         color: #121212;
         padding: 28px 32px;
         line-height: 1.6;
+        word-spacing: 2px !important;
       ">
 
         <!-- ===== HEADER ===== -->
@@ -1649,9 +1650,9 @@ document.addEventListener('DOMContentLoaded', async () => {
               </table>
             </td>
             <td align="center" valign="middle" style="width:45%; text-align:center; vertical-align:middle;">
-              <div style="background:#1a1a1a; border-radius:10px; padding:20px 16px; display:inline-block; width:85%; box-sizing:border-box;">
-                <div style="font-size:11px; color:#aaaaaa; font-family:'Cairo',sans-serif; margin-bottom:6px;">الإجمالي النهائي المستحق</div>
-                <div style="font-size:28px; font-weight:900; color:#f4b400; font-family:'Cairo',sans-serif; line-height:1.2;">${grandTotal} ج.م</div>
+              <div style="background:#f4b400; border-radius:10px; padding:20px 16px; display:inline-block; width:85%; box-sizing:border-box; border:1px solid #d9a000;">
+                <div style="font-size:11px; color:#333333; font-weight:700; font-family:'Cairo',sans-serif; margin-bottom:6px;">الإجمالي النهائي المستحق</div>
+                <div style="font-size:28px; font-weight:900; color:#111111; font-family:'Cairo',sans-serif; line-height:1.2;">${grandTotal} ج.م</div>
               </div>
             </td>
           </tr>
