@@ -1498,15 +1498,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const safeEventName = escapeHTML(evt.eventName || '').replace(/\s+/g, '&nbsp;');
 
       tableRowsHTML += `
-        <tr style="page-break-inside: avoid; break-inside: avoid; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
-          <td align="center" style="width: 4%; text-align: center; padding: 8px 3px; border: 1px solid #dcdcdc; font-size: 10.5px; color: #121212; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">${idx + 1}</td>
-          <td align="right" style="width: 25%; text-align: right; padding: 8px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #111111; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">${safeEventName}</td>
-          <td align="center" style="width: 10%; text-align: center; padding: 8px 4px; border: 1px solid #dcdcdc; font-size: 10.5px; color: #444444; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">${escapeHTML(evt.eventDate)}</td>
-          <td align="center" style="width: 10%; text-align: center; padding: 8px 4px; border: 1px solid #dcdcdc; font-size: 10.5px; font-weight: 700; color: #121212; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">${evt.baseRate}&nbsp;ج.م</td>
-          <td align="center" style="width: 9%; text-align: center; padding: 8px 4px; border: 1px solid #dcdcdc; font-size: 10.5px; color: #1e7e34; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">+${evt.bonus}&nbsp;ج.م</td>
-          <td align="center" style="width: 9%; text-align: center; padding: 8px 4px; border: 1px solid #dcdcdc; font-size: 10.5px; color: #b02a37; font-weight: 700; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">-${evt.deductions}&nbsp;ج.م</td>
-          <td align="right" style="width: 23%; text-align: right; padding: 8px 6px; border: 1px solid #dcdcdc; font-size: 10.5px; color: #b8860b; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">${extraTasksString}</td>
-          <td align="center" style="width: 10%; text-align: center; padding: 8px 4px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'}; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">${evt.netAmount}&nbsp;ج.م</td>
+        <tr dir="rtl" style="page-break-inside: avoid; break-inside: avoid; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
+          <td align="center" style="width: 5%; text-align: center; padding: 10px 4px; border: 1px solid #dcdcdc; font-size: 11px; color: #121212; white-space: nowrap;">${idx + 1}</td>
+          <td align="right" style="width: 28%; text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111; white-space: normal;">${safeEventName}</td>
+          <td align="center" style="width: 12%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #444444; white-space: nowrap;">${escapeHTML(evt.eventDate)}</td>
+          <td align="center" style="width: 11%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #121212; white-space: nowrap;">${evt.baseRate}&nbsp;ج.م</td>
+          <td align="center" style="width: 9%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700; white-space: nowrap;">+${evt.bonus}&nbsp;ج.م</td>
+          <td align="center" style="width: 9%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700; white-space: nowrap;">-${evt.deductions}&nbsp;ج.م</td>
+          <td align="right" style="width: 15%; text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b; white-space: normal;">${extraTasksString}</td>
+          <td align="center" style="width: 11%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'}; white-space: nowrap;">${evt.netAmount}&nbsp;ج.م</td>
         </tr>
       `;
     });
@@ -1528,16 +1528,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const safePaymentAccount = escapeHTML(member.paymentAccount || '-').replace(/\s+/g, '&nbsp;');
     const safeMonthName = getArabicMonthName(monthKey).replace(/\s+/g, '&nbsp;');
 
-    // Hardcoded HTML Template: Word-Wrapping Tables, Explicit &nbsp;, and Simplified Notes Footer
+    // Hardcoded HTML Template: Safe Cursive Arabic Wrapping, Explicit &nbsp;, and Simplified Notes Footer
     pdfContentContainer.innerHTML = `
       <div class="pdf-statement-page" dir="rtl" style="width: 100%; box-sizing: border-box; padding: 20px; border: 2px solid #333; font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; background-color: #ffffff; color: #121212;">
         
         <!-- 1. Header Table (Borderless) -->
         <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid;">
-          <tr>
+          <tr dir="rtl">
             <td align="right" valign="middle" style="width: 60%; text-align: right; vertical-align: middle;">
               <table dir="rtl" border="0" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
-                <tr>
+                <tr dir="rtl">
                   <td valign="middle" style="vertical-align: middle; padding-left: 12px;">
                     <img src="logo.png" alt="4Directions" width="55" height="55" style="width: 55px; height: 55px; display: block;">
                   </td>
@@ -1564,7 +1564,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         <!-- 2. Member Details Table (Borderless 3-Column Table Layout) -->
         <table dir="rtl" width="100%" border="0" cellpadding="8" cellspacing="0" style="width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1px solid #e0e0e0; border-right: 4px solid #d7b704; border-radius: 6px; margin-bottom: 16px; font-family: 'Cairo', sans-serif; page-break-inside: avoid; break-inside: avoid;">
-          <tr>
+          <tr dir="rtl">
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right; border-bottom: 1px solid #f0f0f0;">
               <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">اسم&nbsp;العضو:</p>
               <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${safeMemberName}</p>
@@ -1578,7 +1578,7 @@ document.addEventListener('DOMContentLoaded', async () => {
               <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${safeRank}</p>
             </td>
           </tr>
-          <tr>
+          <tr dir="rtl">
             <td align="right" valign="top" style="width: 33.33%; padding: 8px 12px; text-align: right;">
               <p style="margin: 0 0 3px 0; font-size: 11px; font-weight: 700; color: #666666;">طريقة&nbsp;الدفع&nbsp;المعتمدة:</p>
               <p style="margin: 0; font-size: 13px; font-weight: 800; color: #121212;">${safePaymentMethod}</p>
@@ -1594,18 +1594,18 @@ document.addEventListener('DOMContentLoaded', async () => {
           </tr>
         </table>
 
-        <!-- 3. Main Events Data Table (Fixed Layout, Explicit Column Widths, Word Wrapping) -->
+        <!-- 3. Main Events Data Table (Fixed Layout, Explicit Column Widths, Safe Arabic Cursive Text) -->
         <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; margin-bottom: 16px; font-family: 'Cairo', sans-serif; text-align: right;">
           <thead>
-            <tr style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid; break-inside: avoid;">
-              <th align="center" style="width: 4%; text-align: center; padding: 8px 3px; font-size: 10.5px; border: 1px solid #333333; color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">م</th>
-              <th align="right" style="width: 25%; text-align: right; padding: 8px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">اسم&nbsp;الفعالية&nbsp;/&nbsp;الحفلة</th>
-              <th align="center" style="width: 10%; text-align: center; padding: 8px 4px; font-size: 10.5px; border: 1px solid #333333; color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">التاريخ</th>
-              <th align="center" style="width: 10%; text-align: center; padding: 8px 4px; font-size: 10.5px; border: 1px solid #333333; color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">الأجر&nbsp;الأساسي</th>
-              <th align="center" style="width: 9%; text-align: center; padding: 8px 4px; border: 1px solid #333333; color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">البونص</th>
-              <th align="center" style="width: 9%; text-align: center; padding: 8px 4px; border: 1px solid #333333; color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">الخصومات</th>
-              <th align="right" style="width: 23%; text-align: right; padding: 8px 6px; font-size: 10.5px; border: 1px solid #333333; color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">مهام&nbsp;إضافية</th>
-              <th align="center" style="width: 10%; text-align: center; padding: 8px 4px; border: 1px solid #333333; color: #ffffff; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">صافي&nbsp;الحفلة</th>
+            <tr dir="rtl" style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid; break-inside: avoid;">
+              <th align="center" style="width: 5%; text-align: center; padding: 10px 4px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">م</th>
+              <th align="right" style="width: 28%; text-align: right; padding: 10px 8px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff; white-space: normal;">اسم&nbsp;الفعالية&nbsp;/&nbsp;الحفلة</th>
+              <th align="center" style="width: 12%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">التاريخ</th>
+              <th align="center" style="width: 11%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">الأجر&nbsp;الأساسي</th>
+              <th align="center" style="width: 9%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">البونص</th>
+              <th align="center" style="width: 9%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">الخصومات</th>
+              <th align="right" style="width: 15%; text-align: right; padding: 10px 8px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: normal;">مهام&nbsp;إضافية</th>
+              <th align="center" style="width: 11%; text-align: center; padding: 10px 6px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">صافي&nbsp;الحفلة</th>
             </tr>
           </thead>
           <tbody>
@@ -1615,8 +1615,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         <!-- 4. Financial Totals Summary (Table-Based, Anti-Squish) -->
         <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; background-color: #fbfbfb; border: 1.5px solid #1a1a1a; border-radius: 6px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid; font-family: 'Cairo', sans-serif;">
-          <tr>
-            <td align="right" valign="middle" style="width: 65%; padding: 14px 16px; text-align: right; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
+          <tr dir="rtl">
+            <td align="right" valign="middle" style="width: 65%; padding: 14px 16px; text-align: right; vertical-align: middle; white-space: normal;">
               <p style="margin: 0 0 5px 0; font-size: 13px; font-weight: 800; color: #1a1a1a;">ملخص&nbsp;العمليات&nbsp;الحسابية:</p>
               <p style="margin: 0 0 4px 0; font-size: 11.5px; color: #444444; line-height: 1.6;">
                 الأجور&nbsp;الأساسية&nbsp;(${sumBase}&nbsp;ج.م)&nbsp;+&nbsp;إجمالي&nbsp;البونص&nbsp;(${sumBonus}&nbsp;ج.م)&nbsp;+&nbsp;إضافي&nbsp;(${sumExtra}&nbsp;ج.م)&nbsp;-&nbsp;خصومات&nbsp;(${sumDeductions}&nbsp;ج.م)
@@ -1625,7 +1625,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 إجمالي&nbsp;عدد&nbsp;الفعاليات&nbsp;المنفذة:&nbsp;${attendedEvents.length}&nbsp;فعالية
               </p>
             </td>
-            <td align="center" valign="middle" style="width: 35%; padding: 14px 16px; background-color: #1a1a1a; color: #ffffff; text-align: center; border-right: 4px solid #d7b704; border-radius: 0 5px 5px 0; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; white-space: normal;">
+            <td align="center" valign="middle" style="width: 35%; padding: 14px 16px; background-color: #1a1a1a; color: #ffffff; text-align: center; vertical-align: middle; border-right: 4px solid #d7b704; border-radius: 0 5px 5px 0; white-space: nowrap;">
               <p style="margin: 0 0 4px 0; font-size: 12px; color: #dddddd; font-family: 'Cairo', sans-serif;">الإجمالي&nbsp;النهائي&nbsp;المستحق:</p>
               <p style="margin: 0; font-size: 22px; font-weight: 900; color: #d7b704; font-family: 'Cairo', sans-serif; line-height: 1.3;">${grandTotal}&nbsp;ج.م</p>
             </td>
@@ -1633,7 +1633,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         </table>
 
         <!-- 5. Simplified Notes Footer (No Signature / Dynamic Payment Variables) -->
-        <div style="margin-top: 30px; text-align: right; direction: rtl; font-size: 12px; font-family: 'Cairo', sans-serif; line-height: 1.7; page-break-inside: avoid;">
+        <div style="margin-top: 30px; text-align: right; direction: rtl; font-size: 12px; font-family: 'Cairo', sans-serif; line-height: 1.7; page-break-inside: avoid; white-space: normal;">
           <strong>ملاحظات&nbsp;الإدارة:</strong>&nbsp;يتم&nbsp;تحويل&nbsp;المستحقات&nbsp;بناءً&nbsp;على&nbsp;بيانات&nbsp;الدفع&nbsp;المسجلة&nbsp;أعلاه.
         </div>
 
