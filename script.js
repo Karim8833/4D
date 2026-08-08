@@ -1589,14 +1589,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; margin-bottom: 16px; font-family: 'Cairo', sans-serif; text-align: right;">
           <thead>
             <tr dir="rtl" style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid; break-inside: avoid;">
-              <th align="center" style="width: 3%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">م</th>
-              <th align="right" style="width: 25%; font-size: 11px !important; padding: 12px 6px !important; text-align: right; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">اسم&nbsp;الفعالية&nbsp;/&nbsp;الحفلة</th>
-              <th align="center" style="width: 12%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">التاريخ</th>
-              <th align="center" style="width: 12%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">الأجر&nbsp;الأساسي</th>
-              <th align="center" style="width: 10%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">البونص</th>
-              <th align="center" style="width: 10%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">الخصومات</th>
-              <th align="right" style="width: 18%; font-size: 11px !important; padding: 12px 6px !important; text-align: right; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">مهام&nbsp;إضافية</th>
-              <th align="center" style="width: 10%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">صافي&nbsp;الحفلة</th>
+              <th align="center" style="width: 3%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">م</th>
+              <th align="right" style="width: 25%; font-size: 11px; padding: 10px 6px; text-align: right; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">اسم الفعالية / الحفلة</th>
+              <th align="center" style="width: 12%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">التاريخ</th>
+              <th align="center" style="width: 12%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">الأجر الأساسي</th>
+              <th align="center" style="width: 10%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">البونص</th>
+              <th align="center" style="width: 10%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">الخصومات</th>
+              <th align="right" style="width: 18%; font-size: 11px; padding: 10px 6px; text-align: right; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">مهام إضافية</th>
+              <th align="center" style="width: 10%; font-size: 11px; padding: 10px 4px; text-align: center; white-space: normal !important; line-height: 1.5; overflow: visible; border: 1px solid #333333; color: #ffffff;">صافي الحفلة</th>
             </tr>
           </thead>
           <tbody>
@@ -1633,7 +1633,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Strict A4 multi-page configuration with standard 5mm margin
     const opt = {
-      margin: 5,
+      margin: [10, 10, 10, 10],
       filename: `كشف-حساب-${member.name.replace(/\s+/g, '-')}-${monthKey}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
