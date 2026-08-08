@@ -256,69 +256,96 @@ document.addEventListener('DOMContentLoaded', async () => {
     switchView('home-view');
   }
 
-  // --- 1. Robust Firestore Login Form Submission Handler (Firebase v9 Modular Syntax) ---
+  // --- 1. Robust Firestore Login Execution (Firebase v9 Modular Syntax, Click & Submit Safe) ---
+
+  async function performLogin() {
+    const userField = loginUsernameInput || document.getElementById('username') || document.getElementById('login-username');
+    const passField = loginPasswordInput || document.getElementById('password') || document.getElementById('login-password');
+    const btn = loginBtn || document.getElementById('loginBtn') || document.getElementById('login-btn');
+
+    const enteredUser = userField ? userField.value.trim() : '';
+    const enteredPass = passField ? passField.value.trim() : '';
+
+    if (!enteredUser || !enteredPass) {
+      showToast("يرجى إدخال اسم المستخدم وكلمة المرور.", "danger");
+      return;
+    }
+
+    // UI Loading Feedback
+    const originalBtnHTML = btn ? btn.innerHTML : 'تسجيل الدخول';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
+    }
+
+    try {
+      // Query Firestore 'users' collection using Firebase v9 Modular Syntax
+      const q = query(
+        collection(db, "users"), 
+        where("username", "==", enteredUser), 
+        where("password", "==", enteredPass)
+      );
+      
+      const querySnapshot = await getDocs(q);
+      
+      // Success State: User document found
+      if (!querySnapshot.empty) {
+        let userRole = 'user';
+        let userName = enteredUser;
+
+        querySnapshot.forEach((docSnap) => {
+          const userData = docSnap.data();
+          userRole = userData.role || 'user';
+          userName = userData.username || enteredUser;
+        });
+
+        // Save credentials and role to localStorage for RBAC
+        localStorage.setItem('role', userRole);
+        localStorage.setItem('username', userName);
+        localStorage.setItem('fd_user', JSON.stringify({ username: userName, role: userRole }));
+        sessionStorage.setItem('fd_user', JSON.stringify({ username: userName, role: userRole }));
+        
+        // Switch to main dashboard and initialize session views
+        loginUserSession(userName, userRole);
+        showToast(`أهلاً بك مجدداً، ${userName}!`, "success");
+        if (userField) userField.value = '';
+        if (passField) passField.value = '';
+      } else {
+        // Error State: No matching user found (Arabic UI Alert)
+        console.error("Firestore Login Error: auth/invalid-credentials", "اسم المستخدم أو كلمة المرور غير صحيحة.");
+        showToast("اسم المستخدم أو كلمة المرور غير صحيحة", "danger");
+      }
+    } catch (error) {
+      console.error("Firestore Login Error:", error.code || "unknown-code", error.message || error);
+      showToast("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً", "danger");
+    } finally {
+      // Restore login button state
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = originalBtnHTML;
+      }
+    }
+  }
+
+  if (loginBtn) {
+    loginBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      performLogin();
+    });
+  }
 
   if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
-      // 1. Prevent default form submission and page refresh
+    loginForm.addEventListener('submit', (e) => {
       e.preventDefault();
-      
-      const enteredUser = loginUsernameInput.value.trim();
-      const enteredPass = loginPasswordInput.value.trim();
+      performLogin();
+    });
+  }
 
-      if (!enteredUser || !enteredPass) {
-        showToast("يرجى إدخال اسم المستخدم وكلمة المرور.", "danger");
-        return;
-      }
-
-      // UI Loading Feedback
-      const originalBtnHTML = loginBtn.innerHTML;
-      loginBtn.disabled = true;
-      loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري التحقق...';
-
-      try {
-        // 2. Query Firestore 'users' collection using Firebase v9 Modular Syntax
-        const q = query(
-          collection(db, "users"), 
-          where("username", "==", enteredUser), 
-          where("password", "==", enteredPass)
-        );
-        
-        const querySnapshot = await getDocs(q);
-        
-        // 3. Success State: User document found
-        if (!querySnapshot.empty) {
-          let userRole = 'user';
-          let userName = enteredUser;
-
-          querySnapshot.forEach((doc) => {
-            const userData = doc.data();
-            userRole = userData.role || 'user';
-            userName = userData.username || enteredUser;
-          });
-
-          // Save credentials and role to localStorage for RBAC
-          localStorage.setItem('role', userRole);
-          localStorage.setItem('username', userName);
-          localStorage.setItem('fd_user', JSON.stringify({ username: userName, role: userRole }));
-          sessionStorage.setItem('fd_user', JSON.stringify({ username: userName, role: userRole }));
-          
-          // Switch to main dashboard and initialize session views
-          loginUserSession(userName, userRole);
-          showToast(`أهلاً بك مجدداً، ${userName}!`, "success");
-          loginForm.reset();
-        } else {
-          // 4. Error State: No matching user found (Arabic UI Alert)
-          console.error("Firestore Login Error: auth/invalid-credentials", "اسم المستخدم أو كلمة المرور غير صحيحة.");
-          showToast("اسم المستخدم أو كلمة المرور غير صحيحة", "danger");
-        }
-      } catch (error) {
-        console.error("Firestore Login Error:", error.code || "unknown-code", error.message || error);
-        showToast("حدث خطأ في الاتصال، يرجى المحاولة لاحقاً", "danger");
-      } finally {
-        // Restore login button state
-        loginBtn.disabled = false;
-        loginBtn.innerHTML = originalBtnHTML;
+  if (loginPasswordInput) {
+    loginPasswordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        performLogin();
       }
     });
   }
