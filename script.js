@@ -1496,13 +1496,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       tableRowsHTML += `
         <tr dir="rtl" style="page-break-inside: avoid; break-inside: avoid; background-color: ${idx % 2 === 0 ? '#ffffff' : '#f9f9f9'};">
-          <td align="center" style="width: 4%; text-align: center; padding: 10px 4px; border: 1px solid #dcdcdc; font-size: 11px; color: #121212; white-space: nowrap;">${idx + 1}</td>
-          <td align="right" style="width: 30%; text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111; white-space: normal; line-height: 1.4;">${escapeHTML(evt.eventName)}</td>
-          <td align="center" style="width: 10%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #444444; white-space: nowrap;">${escapeHTML(evt.eventDate)}</td>
-          <td align="center" style="width: 9%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #121212; white-space: nowrap;">${evt.baseRate}&nbsp;ج.م</td>
-          <td align="center" style="width: 8%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700; white-space: nowrap;">+${evt.bonus}&nbsp;ج.م</td>
-          <td align="center" style="width: 8%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700; white-space: nowrap;">-${evt.deductions}&nbsp;ج.م</td>
-          <td align="right" style="width: 21%; text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b; white-space: normal; line-height: 1.4;">${extraTasksString}</td>
+          <td align="center" style="width: 3%; text-align: center; padding: 10px 4px; border: 1px solid #dcdcdc; font-size: 11px; color: #121212; white-space: nowrap;">${idx + 1}</td>
+          <td align="right" style="width: 25%; text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 700; color: #111111; white-space: normal; line-height: 1.4;">${escapeHTML(evt.eventName)}</td>
+          <td align="center" style="width: 12%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #444444; white-space: nowrap;">${escapeHTML(evt.eventDate)}</td>
+          <td align="center" style="width: 12%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; font-weight: 700; color: #121212; white-space: nowrap;">${evt.baseRate}&nbsp;ج.م</td>
+          <td align="center" style="width: 10%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #1e7e34; font-weight: 700; white-space: nowrap;">+${evt.bonus}&nbsp;ج.م</td>
+          <td align="center" style="width: 10%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11px; color: #b02a37; font-weight: 700; white-space: nowrap;">-${evt.deductions}&nbsp;ج.م</td>
+          <td align="right" style="width: 18%; text-align: right; padding: 10px 8px; border: 1px solid #dcdcdc; font-size: 11px; color: #b8860b; white-space: normal; line-height: 1.4;">${extraTasksString}</td>
           <td align="center" style="width: 10%; text-align: center; padding: 10px 6px; border: 1px solid #dcdcdc; font-size: 11.5px; font-weight: 900; color: #111111; background-color: ${idx % 2 === 0 ? '#fdfdfd' : '#f4f4f4'}; white-space: nowrap;">${evt.netAmount}&nbsp;ج.م</td>
         </tr>
       `;
@@ -1519,9 +1519,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       day: 'numeric'
     });
 
-    // Hardcoded HTML Template: Natural Dynamic Wrapping, Stacked <br> Extra Tasks, and Clean Notes Footer
+    // Hardcoded HTML Template: Single Outer Border #222, Distinct <th> Headers, and Clean 5mm Margins
     pdfContentContainer.innerHTML = `
-      <div class="pdf-statement-page" dir="rtl" style="width: 100%; box-sizing: border-box; padding: 20px; border: 2px solid #333; font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; background-color: #ffffff; color: #121212;">
+      <div id="pdf-content" dir="rtl" style="width: 100%; box-sizing: border-box; padding: 22px 24px; border: 2px solid #222; font-family: 'Cairo', 'Tajawal', sans-serif !important; line-height: 1.75 !important; background-color: #ffffff; color: #121212; margin: 0; outline: none;">
         
         <!-- 1. Header Table (Borderless) -->
         <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse; border-bottom: 2px solid #d7b704; padding-bottom: 14px; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid;">
@@ -1585,18 +1585,18 @@ document.addEventListener('DOMContentLoaded', async () => {
           </tr>
         </table>
 
-        <!-- 3. Main Events Data Table (Fixed Layout, Explicit Column Widths, Natural Arabic Text Wrapping) -->
+        <!-- 3. Main Events Data Table (Explicit <th> Typography & 100% Proportions) -->
         <table dir="rtl" width="100%" border="0" cellpadding="0" cellspacing="0" style="table-layout: fixed; width: 100%; border-collapse: collapse; margin-bottom: 16px; font-family: 'Cairo', sans-serif; text-align: right;">
           <thead>
             <tr dir="rtl" style="background-color: #1a1a1a; color: #ffffff; page-break-inside: avoid; break-inside: avoid;">
-              <th align="center" style="width: 4%; text-align: center; padding: 10px 4px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">م</th>
-              <th align="right" style="width: 30%; text-align: right; padding: 10px 8px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff; white-space: normal;">اسم الفعالية / الحفلة</th>
-              <th align="center" style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">التاريخ</th>
-              <th align="center" style="width: 9%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">الأجر الأساسي</th>
-              <th align="center" style="width: 8%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">البونص</th>
-              <th align="center" style="width: 8%; text-align: center; padding: 10px 6px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">الخصومات</th>
-              <th align="right" style="width: 21%; text-align: right; padding: 10px 8px; font-size: 11px; border: 1px solid #333333; color: #ffffff; white-space: normal;">مهام إضافية</th>
-              <th align="center" style="width: 10%; text-align: center; padding: 10px 6px; font-size: 11.5px; border: 1px solid #333333; color: #ffffff; white-space: nowrap;">صافي الحفلة</th>
+              <th align="center" style="width: 3%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">م</th>
+              <th align="right" style="width: 25%; font-size: 11px !important; padding: 12px 6px !important; text-align: right; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">اسم&nbsp;الفعالية&nbsp;/&nbsp;الحفلة</th>
+              <th align="center" style="width: 12%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">التاريخ</th>
+              <th align="center" style="width: 12%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">الأجر&nbsp;الأساسي</th>
+              <th align="center" style="width: 10%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">البونص</th>
+              <th align="center" style="width: 10%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">الخصومات</th>
+              <th align="right" style="width: 18%; font-size: 11px !important; padding: 12px 6px !important; text-align: right; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">مهام&nbsp;إضافية</th>
+              <th align="center" style="width: 10%; font-size: 11px !important; padding: 12px 4px !important; text-align: center; white-space: nowrap; border: 1px solid #333333; color: #ffffff;">صافي&nbsp;الحفلة</th>
             </tr>
           </thead>
           <tbody>
@@ -1631,9 +1631,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       </div>
     `;
 
-    // Strict A4 multi-page configuration with standard 10mm margins
+    // Strict A4 multi-page configuration with standard 5mm margin
     const opt = {
-      margin: [10, 10, 10, 10],
+      margin: 5,
       filename: `كشف-حساب-${member.name.replace(/\s+/g, '-')}-${monthKey}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: {
