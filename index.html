@@ -468,7 +468,7 @@
               <!-- Form Panel -->
               <section class="vault-panel">
                 <h3 class="admin-subtitle">إضافة عضو جديد</h3>
-                <form id="add-team-form" novalidate>
+                <form id="add-team-form" onsubmit="event.preventDefault();" novalidate>
                   <div class="form-group">
                     <label for="team-member-name" class="form-label">اسم العضو</label>
                     <input type="text" id="team-member-name" class="form-input" placeholder="أدخل اسم العضو" required>
@@ -510,7 +510,7 @@
                       placeholder="رقم المحفظة أو اسم حساب Instapay" required>
                   </div>
 
-                  <button type="submit" class="btn-primary">
+                  <button type="button" id="add-team-btn" class="btn-primary">
                     <i class="fa-solid fa-user-plus"></i>
                     إضافة إلى الفريق
                   </button>

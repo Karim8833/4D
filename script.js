@@ -626,6 +626,86 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // --- Add & Manage Team Members Logic ---
+
+  const addTeamBtn = document.getElementById('add-team-btn');
+
+  async function handleAddTeamMember(e) {
+    if (e) e.preventDefault();
+
+    const name = teamMemberName ? teamMemberName.value.trim() : '';
+    const rank = teamMemberRank ? teamMemberRank.value.trim() : '';
+    const phone = teamMemberPhone ? teamMemberPhone.value.trim() : '';
+    const paymentMethod = teamMemberPaymentMethod ? teamMemberPaymentMethod.value.trim() : '';
+    const paymentAccount = teamMemberPaymentAccount ? teamMemberPaymentAccount.value.trim() : '';
+
+    // Validation: Ensure required fields are not empty
+    if (!name || !rank || !phone || !paymentMethod || !paymentAccount) {
+      showToast("يرجى ملء جميع بيانات العضو المطلوبة.", "danger");
+      return;
+    }
+
+    // UI Loading Feedback
+    const originalBtnHTML = addTeamBtn ? addTeamBtn.innerHTML : '';
+    if (addTeamBtn) {
+      addTeamBtn.disabled = true;
+      addTeamBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الإضافة...';
+    }
+
+    try {
+      // Generate unique 4D member code
+      const code = `4D-${Math.floor(1000 + Math.random() * 9000)}`;
+
+      // Firestore v9 Write to team_members collection
+      await addDoc(collection(db, "team_members"), {
+        name: name,
+        rank: rank,
+        phone: phone,
+        paymentMethod: paymentMethod,
+        paymentAccount: paymentAccount,
+        code: code,
+        createdAt: serverTimestamp()
+      });
+
+      showToast(`تمت إضافة العضو "${name}" إلى الفريق بنجاح!`, "success");
+
+      if (addTeamForm) {
+        addTeamForm.reset();
+      }
+    } catch (err) {
+      console.error("Error adding team member to Firestore:", err);
+      showToast("فشل في إضافة العضو إلى قاعدة البيانات.", "danger");
+    } finally {
+      if (addTeamBtn) {
+        addTeamBtn.disabled = false;
+        addTeamBtn.innerHTML = originalBtnHTML;
+      }
+    }
+  }
+
+  if (addTeamBtn) {
+    addTeamBtn.addEventListener('click', handleAddTeamMember);
+  }
+
+  if (addTeamForm) {
+    addTeamForm.addEventListener('submit', handleAddTeamMember);
+  }
+
+  window.deleteTeamMember = async function (id) {
+    const member = teamMembers.find(t => t.id === id);
+    const name = member ? member.name : 'العضو';
+
+    if (confirm(`هل أنت متأكد من حذف العضو "${name}" من الفريق؟`)) {
+      try {
+        await deleteDoc(doc(db, "team_members", id));
+        showToast(`تمت إزالة "${name}" من الفريق.`, "success");
+      } catch (err) {
+        console.error("Error deleting team member:", err);
+        showToast("فشل في إزالة العضو من الفريق.", "danger");
+      }
+    }
+  };
+
   // --- Events Module Real-time Listener ---
 
   function setupEventsRealtimeListener() {
