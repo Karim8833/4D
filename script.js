@@ -191,6 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentFilter = 'all';
   let searchQuery = '';
   let activeEventId = null;
+  let currentUserRole = 'user';
 
   // Helper: Format Current Month (YYYY-MM)
   function getSystemCurrentMonth() {
@@ -238,8 +239,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function loginUserSession(username, role) {
+    currentUserRole = role || 'user';
+
     // Persist session in sessionStorage and localStorage
-    const sessionData = JSON.stringify({ username, role });
+    const sessionData = JSON.stringify({ username, role: currentUserRole });
     sessionStorage.setItem('fd_user', sessionData);
     localStorage.setItem('fd_user', sessionData);
 
@@ -257,23 +260,56 @@ document.addEventListener('DOMContentLoaded', async () => {
       heroGreeting.innerHTML = `أهلاً يا <span class="brand-accent">${escapeHTML(username)}</span> 👋`;
     }
 
-    // RBAC: Toggle Admin-only elements
-    if (role === 'admin') {
-      adminOnlyElements.forEach(el => el.style.display = '');
-      setupUsersRealtimeListener();
+    const isAdmin = currentUserRole === 'admin' || currentUserRole === 'مسؤول النظام';
+
+    // Strict RBAC Sidebar Links & Views Controls:
+    // Admin sees: Home (home-view), Vault (vault-view), Events (events-view), Settlements (settlements-view), Team (team-view), Settings (settings-view)
+    // Normal User sees ONLY: Vault (vault-view), Team (team-view)
+    const adminOnlyTargets = ['home-view', 'events-view', 'settlements-view', 'settings-view'];
+
+    navLinks.forEach(link => {
+      const target = link.getAttribute('data-target');
+      const parentLi = link.closest('.nav-item');
+      if (adminOnlyTargets.includes(target)) {
+        if (parentLi) parentLi.style.display = isAdmin ? '' : 'none';
+      } else {
+        if (parentLi) parentLi.style.display = '';
+      }
+    });
+
+    // Toggle generic .admin-only elements
+    adminOnlyElements.forEach(el => {
+      el.style.display = isAdmin ? '' : 'none';
+    });
+
+    // Explicitly hide Home section and statistics completely for Normal Users
+    const homeViewEl = document.getElementById('home-view');
+    const heroCard = document.querySelector('.welcome-banner');
+    if (!isAdmin) {
+      if (homeViewEl) homeViewEl.style.display = 'none';
+      if (homeStats) homeStats.style.display = 'none';
+      if (heroCard) heroCard.style.display = 'none';
     } else {
-      adminOnlyElements.forEach(el => el.style.display = 'none');
+      if (homeViewEl) homeViewEl.style.display = '';
+      if (homeStats) homeStats.style.display = 'flex';
+      if (heroCard) heroCard.style.display = '';
+      setupUsersRealtimeListener();
     }
 
-    if (homeStats) homeStats.style.display = 'flex';
     setupTeamRealtimeListener();
     setupEventsRealtimeListener();
     setupSettlementsRealtimeListener();
     setupMessagesRealtimeListener();
     updateTextareaCounters();
 
-    // Redirect to main dashboard
-    switchView('home-view');
+    // Initial Routing:
+    // Admin -> Home ("الرئيسية" / home-view)
+    // Normal User -> Vault ("خزنة الرسائل" / vault-view)
+    if (isAdmin) {
+      switchView('home-view');
+    } else {
+      switchView('vault-view');
+    }
   }
 
   // --- 1. Robust Firestore Login Execution (Firebase v9 Modular Syntax, Click & Submit Safe) ---
@@ -431,6 +467,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function switchView(viewId) {
+    const isAdmin = currentUserRole === 'admin' || currentUserRole === 'مسؤول النظام';
+    const restrictedViews = ['home-view', 'events-view', 'settlements-view', 'settings-view'];
+
+    // Strict view protection: Normal Users attempting to navigate to restricted views are routed to Vault (vault-view)
+    if (!isAdmin && restrictedViews.includes(viewId)) {
+      viewId = 'vault-view';
+    }
+
     // Update nav links active state
     navLinks.forEach(link => {
       if (link.getAttribute('data-target') === viewId) {
@@ -444,12 +488,25 @@ document.addEventListener('DOMContentLoaded', async () => {
     viewSections.forEach(section => {
       if (section.id === viewId) {
         section.classList.add('active');
+        section.style.display = '';
       } else {
         section.classList.remove('active');
+        if (section.id === 'home-view' || !isAdmin) {
+          section.style.display = 'none';
+        }
       }
     });
 
-    if (viewId === 'settlements-view') {
+    // Extra DOM Hardening: Keep Home View and sensitive statistics strictly hidden for Normal Users
+    if (!isAdmin) {
+      const homeViewEl = document.getElementById('home-view');
+      const heroCard = document.querySelector('.welcome-banner');
+      if (homeViewEl) homeViewEl.style.display = 'none';
+      if (homeStats) homeStats.style.display = 'none';
+      if (heroCard) heroCard.style.display = 'none';
+    }
+
+    if (viewId === 'settlements-view' && isAdmin) {
       renderMonthlySettlements();
     }
   }

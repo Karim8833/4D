@@ -74,7 +74,7 @@
 
         <nav class="sidebar-nav">
           <ul class="nav-list">
-            <li class="nav-item">
+            <li class="nav-item admin-only" style="display: none;">
               <a href="#" class="nav-link active" data-target="home-view">
                 <i class="fa-solid fa-house"></i>
                 <span>الرئيسية</span>
@@ -86,24 +86,23 @@
                 <span>خزنة الرسائل</span>
               </a>
             </li>
-            <!-- Events & Monthly Billing Navigation -->
             <li class="nav-item">
+              <a href="#" class="nav-link" data-target="team-view">
+                <i class="fa-solid fa-users"></i>
+                <span>فريق العمل</span>
+              </a>
+            </li>
+            <!-- Events & Monthly Billing Navigation -->
+            <li class="nav-item admin-only" style="display: none;">
               <a href="#" class="nav-link" data-target="events-view">
                 <i class="fa-solid fa-calendar-check"></i>
                 <span>الفعاليات والحفلات</span>
               </a>
             </li>
-            <li class="nav-item">
+            <li class="nav-item admin-only" style="display: none;">
               <a href="#" class="nav-link" data-target="settlements-view">
                 <i class="fa-solid fa-file-invoice-dollar"></i>
                 <span>تقفيل الحسابات</span>
-              </a>
-            </li>
-            <!-- Admin Only Items -->
-            <li class="nav-item admin-only" style="display: none;">
-              <a href="#" class="nav-link" data-target="team-view">
-                <i class="fa-solid fa-users"></i>
-                <span>فريق العمل</span>
               </a>
             </li>
           </ul>
@@ -170,7 +169,7 @@
         <div class="views-container">
 
           <!-- ========== 1. HOME VIEW ========== -->
-          <section id="home-view" class="view-section active">
+          <section id="home-view" class="view-section active admin-only">
             <div class="welcome-banner hero-card">
               <h1 id="hero-greeting" class="hero-title">أهلاً يا <span id="hero-username">مستخدم</span> 🎉</h1>
               <p class="hero-slogan">جاهز للشغل يا بطل ؟</p>
@@ -277,7 +276,7 @@
           </section>
 
           <!-- ========== 3. EVENTS MANAGEMENT VIEW ========== -->
-          <section id="events-view" class="view-section">
+          <section id="events-view" class="view-section admin-only">
             <h2 class="panel-title">إدارة الفعاليات والحفلات</h2>
 
             <div class="dashboard-grid">
@@ -371,7 +370,7 @@
           </section>
 
           <!-- ========== 4. MONTHLY SETTLEMENTS VIEW ========== -->
-          <section id="settlements-view" class="view-section">
+          <section id="settlements-view" class="view-section admin-only">
             <div class="settlements-header-card">
               <div class="settlements-title-box">
                 <h2 class="panel-title" style="margin-bottom: 5px;">تقفيل الحسابات الشهرية</h2>
@@ -459,8 +458,8 @@
             </section>
           </section>
 
-          <!-- ========== 5. TEAM VIEW (Admin Only) ========== -->
-          <section id="team-view" class="view-section admin-only">
+          <!-- ========== 5. TEAM VIEW ========== -->
+          <section id="team-view" class="view-section">
             <h2 class="panel-title">إدارة فريق العمل</h2>
 
             <div class="dashboard-grid">
