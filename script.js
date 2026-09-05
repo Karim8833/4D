@@ -653,8 +653,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     try {
-      // Generate unique 4D member code
-      const code = `4D-${Math.floor(1000 + Math.random() * 9000)}`;
+      // Fetch current team members to determine the next sequential code
+      const teamSnapshot = await getDocs(teamCol);
+      let maxNumber = 0;
+
+      teamSnapshot.forEach((docSnap) => {
+        const memberData = docSnap.data();
+        if (memberData.code && typeof memberData.code === 'string') {
+          const codeNumber = parseInt(memberData.code.replace("4D-", ""), 10);
+          if (!isNaN(codeNumber) && codeNumber > maxNumber) {
+            maxNumber = codeNumber;
+          }
+        }
+      });
+
+      const code = `4D-${maxNumber + 1}`;
 
       // Firestore v9 Write to team_members collection
       await addDoc(collection(db, "team_members"), {
