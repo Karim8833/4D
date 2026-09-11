@@ -42,6 +42,7 @@ import {
   orderBy,
   where,
   getDocs,
+  writeBatch,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
@@ -1031,28 +1032,140 @@ document.addEventListener('DOMContentLoaded', async () => {
         saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
       }
 
-      try {
-        const eventRef = doc(db, "events", currentEditEventId);
-        await updateDoc(eventRef, {
-          rates: {
-            managerRate: managerRate,
-            teamLeaderRate: teamLeaderRate,
-            organizerRate: organizerRate
-          }
-        });
+      // Helper function: Determine new base rate by member rank/role
+      function getNewBaseRate(rankOrRole) {
+        const r = (rankOrRole || '').toString().toLowerCase();
+        if (r.includes('manager') || r.includes('owner') || r.includes('مانجر')) {
+          return managerRate;
+        } else if (r.includes('leader') || r.includes('تيم ليدر')) {
+          return teamLeaderRate;
+        } else {
+          return organizerRate;
+        }
+      }
 
-        showToast("تم تحديث أسعار الرتب بنجاح!", "success");
+      const eventId = currentEditEventId;
+      const targetEvt = eventsList.find(evt => evt.id === eventId);
+      const existingAttendees = targetEvt && targetEvt.attendees ? [...targetEvt.attendees] : [];
+
+      // 1. Recalculate embedded attendees array with new base rates & net amounts
+      const updatedAttendees = existingAttendees.map(att => {
+        const newBaseRate = getNewBaseRate(att.rank || att.role);
+        const extraTotal = att.extraTasks && Array.isArray(att.extraTasks)
+          ? att.extraTasks.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+          : 0;
+        const newNet = newBaseRate + (Number(att.bonus) || 0) + extraTotal - (Number(att.deductions) || 0);
+
+        return {
+          ...att,
+          baseRate: newBaseRate,
+          netAmount: newNet
+        };
+      });
+
+      // Prepare Firestore writeBatch
+      const batch = writeBatch(db);
+
+      // Add main event document update to batch
+      const eventRef = doc(db, "events", eventId);
+      batch.update(eventRef, {
+        rates: {
+          managerRate: managerRate,
+          teamLeaderRate: teamLeaderRate,
+          organizerRate: organizerRate
+        },
+        attendees: updatedAttendees
+      });
+
+      // 2. Query standalone 'attendance' collection (if present) for this eventId
+      try {
+        const attendanceQuery = query(collection(db, "attendance"), where("eventId", "==", eventId));
+        const attendanceSnap = await getDocs(attendanceQuery);
+
+        attendanceSnap.forEach(attDoc => {
+          const data = attDoc.data();
+          const newBaseRate = getNewBaseRate(data.rank || data.role);
+          const extraTotal = data.extraTasks && Array.isArray(data.extraTasks)
+            ? data.extraTasks.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+            : 0;
+          const newNet = newBaseRate + (Number(data.bonus) || 0) + extraTotal - (Number(data.deductions) || 0);
+
+          batch.update(attDoc.ref, {
+            baseRate: newBaseRate,
+            netAmount: newNet
+          });
+        });
+      } catch (qErr) {
+        console.warn("No standalone attendance collection query required:", qErr);
+      }
+
+      // Check subcollection events/{eventId}/attendance (if present)
+      try {
+        const subColSnap = await getDocs(collection(db, "events", eventId, "attendance"));
+        subColSnap.forEach(attDoc => {
+          const data = attDoc.data();
+          const newBaseRate = getNewBaseRate(data.rank || data.role);
+          const extraTotal = data.extraTasks && Array.isArray(data.extraTasks)
+            ? data.extraTasks.reduce((sum, t) => sum + (Number(t.amount) || 0), 0)
+            : 0;
+          const newNet = newBaseRate + (Number(data.bonus) || 0) + extraTotal - (Number(data.deductions) || 0);
+
+          batch.update(attDoc.ref, {
+            baseRate: newBaseRate,
+            netAmount: newNet
+          });
+        });
+      } catch (subErr) {
+        console.warn("No subcollection attendance found:", subErr);
+      }
+
+      // 3. Commit Batch and Trigger Global UI Auto-Refresh
+      batch.commit().then(() => {
+        showToast("تم تحديث أسعار الرتب وإعادة حساب مستحقّات الحضور بنجاح!", "success");
         closeEditPricesModal();
+
+        // Update local memory state for real-time reactivity
+        if (targetEvt) {
+          targetEvt.rates = { managerRate, teamLeaderRate, organizerRate };
+          targetEvt.attendees = updatedAttendees;
+        }
+
+        // Global UI Auto-Refresh
         renderEventsTable();
-      } catch (err) {
-        console.error("Error updating event prices:", err);
-        showToast("فشل في تحديث الأسعار.", "danger");
-      } finally {
+        renderMonthlySettlements();
+
+        // Auto-refresh Event Attendance modal if currently open for this event
+        if (activeEventId === eventId) {
+          const updatedEvt = eventsList.find(e => e.id === eventId) || targetEvt;
+          if (updatedEvt) {
+            if (modalRatesBanner) {
+              modalRatesBanner.innerHTML = `
+                <div class="rate-pill">
+                  <span>أجر المانجر الافتراضي:</span>
+                  <strong>${managerRate} ج.م</strong>
+                </div>
+                <div class="rate-pill">
+                  <span>أجر التيم ليدر الافتراضي:</span>
+                  <strong>${teamLeaderRate} ج.م</strong>
+                </div>
+                <div class="rate-pill">
+                  <span>أجر الأورجانيزر الافتراضي:</span>
+                  <strong>${organizerRate} ج.م</strong>
+                </div>
+              `;
+            }
+            renderModalAttendeesList(updatedEvt);
+          }
+        }
+      }).catch(err => {
+        console.error("Error performing batch update for event prices:", err);
+        showToast("فشل في تحديث الأسعار ومستحقات الحضور.", "danger");
+      }).finally(() => {
         if (saveBtn) {
           saveBtn.disabled = false;
           saveBtn.innerHTML = originalHTML;
         }
-      }
+      });
     });
   }
 
