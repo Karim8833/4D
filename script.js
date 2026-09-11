@@ -167,6 +167,16 @@ document.addEventListener('DOMContentLoaded', async () => {
   const breakdownSummaryBox = document.getElementById('breakdown-summary-box');
   const closeBreakdownModalBtn = document.getElementById('close-breakdown-modal-btn');
 
+  // DOM Elements - Edit Event Rank Prices Modal
+  const editPricesModal = document.getElementById('edit-prices-modal');
+  const closeEditPricesModalBtn = document.getElementById('close-edit-prices-modal-btn');
+  const editPricesForm = document.getElementById('edit-prices-form');
+  const editManagerPriceInput = document.getElementById('edit-manager-price');
+  const editTeamLeaderPriceInput = document.getElementById('edit-teamleader-price');
+  const editOrganizerPriceInput = document.getElementById('edit-organizer-price');
+  const editPricesModalTitle = document.getElementById('edit-prices-modal-title');
+  const editPricesModalSubtitle = document.getElementById('edit-prices-modal-subtitle');
+
   // DOM Elements - Team Management Section
   const addTeamForm = document.getElementById('add-team-form');
   const teamMemberName = document.getElementById('team-member-name');
@@ -191,6 +201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentFilter = 'all';
   let searchQuery = '';
   let activeEventId = null;
+  let currentEditEventId = null;
   let currentUserRole = 'user';
 
   // Helper: Format Current Month (YYYY-MM)
@@ -871,6 +882,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         <td>
           <div class="table-actions">
             <button 
+              class="action-btn edit-btn" 
+              onclick="openEditPricesModal('${event.id}')" 
+              title="تعديل أسعار الرتب"
+            >
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button 
               class="btn-action-view" 
               onclick="openEventAttendeesModal('${event.id}')" 
               title="إدارة الحضور والتسعير الذكي"
@@ -949,6 +967,94 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
     }
   };
+
+  // --- Edit Event Rank Prices Modal Management ---
+
+  window.openEditPricesModal = function (eventId) {
+    const evt = eventsList.find(e => e.id === eventId);
+    if (!evt) return;
+
+    currentEditEventId = eventId;
+
+    if (editPricesModalTitle) {
+      editPricesModalTitle.textContent = `تعديل أسعار: ${evt.name}`;
+    }
+    if (editPricesModalSubtitle) {
+      editPricesModalSubtitle.textContent = `تاريخ الحفلة: ${evt.date}`;
+    }
+
+    const rates = evt.rates || {};
+    if (editManagerPriceInput) editManagerPriceInput.value = rates.managerRate || 0;
+    if (editTeamLeaderPriceInput) editTeamLeaderPriceInput.value = rates.teamLeaderRate || 0;
+    if (editOrganizerPriceInput) editOrganizerPriceInput.value = rates.organizerRate || 0;
+
+    if (editPricesModal) {
+      editPricesModal.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+  };
+
+  function closeEditPricesModal() {
+    if (editPricesModal) {
+      editPricesModal.style.display = 'none';
+      document.body.style.overflow = '';
+    }
+    currentEditEventId = null;
+  }
+
+  if (closeEditPricesModalBtn) {
+    closeEditPricesModalBtn.addEventListener('click', closeEditPricesModal);
+  }
+
+  if (editPricesModal) {
+    editPricesModal.addEventListener('click', (e) => {
+      if (e.target === editPricesModal) {
+        closeEditPricesModal();
+      }
+    });
+  }
+
+  if (editPricesForm) {
+    editPricesForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!currentEditEventId) return;
+
+      const managerRate = Number(editManagerPriceInput.value) || 0;
+      const teamLeaderRate = Number(editTeamLeaderPriceInput.value) || 0;
+      const organizerRate = Number(editOrganizerPriceInput.value) || 0;
+
+      const saveBtn = document.getElementById('save-prices-btn');
+      const originalHTML = saveBtn ? saveBtn.innerHTML : '';
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+      }
+
+      try {
+        const eventRef = doc(db, "events", currentEditEventId);
+        await updateDoc(eventRef, {
+          rates: {
+            managerRate: managerRate,
+            teamLeaderRate: teamLeaderRate,
+            organizerRate: organizerRate
+          }
+        });
+
+        showToast("تم تحديث أسعار الرتب بنجاح!", "success");
+        closeEditPricesModal();
+        renderEventsTable();
+      } catch (err) {
+        console.error("Error updating event prices:", err);
+        showToast("فشل في تحديث الأسعار.", "danger");
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalHTML;
+        }
+      }
+    });
+  }
 
   // --- Event Attendees & Smart Pricing Modal Management ---
 

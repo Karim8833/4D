@@ -768,6 +768,52 @@
     </div>
   </div>
 
+  <!-- 3. Edit Event Rank Prices Modal -->
+  <div id="edit-prices-modal" class="modal custom-modal-backdrop" style="display: none;">
+    <div class="custom-modal-dialog" style="max-width: 500px;">
+      <div class="custom-modal-header">
+        <div>
+          <h3 class="modal-title" id="edit-prices-modal-title">تعديل أسعار الرتب</h3>
+          <span class="modal-subtitle" id="edit-prices-modal-subtitle">تعديل الأجور الأساسية للفعالية</span>
+        </div>
+        <button class="modal-close-btn" id="close-edit-prices-modal-btn" title="إغلاق">&times;</button>
+      </div>
+
+      <div class="custom-modal-body">
+        <form id="edit-prices-form" novalidate>
+          <div class="form-group">
+            <label for="edit-manager-price" class="form-label">أجر المانجر (ج.م)</label>
+            <div class="input-icon-wrapper">
+              <input type="number" id="edit-manager-price" class="form-input" placeholder="مثال: 500" min="0" required>
+              <span class="input-icon">ج.م</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-teamleader-price" class="form-label">أجر التيم ليدر (ج.م)</label>
+            <div class="input-icon-wrapper">
+              <input type="number" id="edit-teamleader-price" class="form-input" placeholder="مثال: 400" min="0" required>
+              <span class="input-icon">ج.م</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-organizer-price" class="form-label">أجر الأورجانيزر (ج.م)</label>
+            <div class="input-icon-wrapper">
+              <input type="number" id="edit-organizer-price" class="form-input" placeholder="مثال: 300" min="0" required>
+              <span class="input-icon">ج.م</span>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" id="save-prices-btn" style="margin-top: 15px;">
+            <i class="fa-solid fa-floppy-disk"></i>
+            حفظ التعديلات
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== 3. HIDDEN ARABIC PDF STATEMENT TEMPLATE ==================== -->
   <div id="pdf-container-wrapper" style="position: absolute; left: -9999px; top: -9999px; width: 760px; max-width: 760px; background: #ffffff; color: #121212; font-family: 'Cairo', 'Tajawal', sans-serif;">
     <div id="pdf-statement-content" class="pdf-statement-page" dir="rtl">
