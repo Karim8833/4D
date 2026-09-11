@@ -178,6 +178,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editPricesModalTitle = document.getElementById('edit-prices-modal-title');
   const editPricesModalSubtitle = document.getElementById('edit-prices-modal-subtitle');
 
+  // DOM Elements - Edit Attendee Financials Modal
+  const editAttendeeModal = document.getElementById('edit-attendee-modal');
+  const closeEditAttendeeModalBtn = document.getElementById('close-edit-attendee-modal-btn');
+  const editAttendeeForm = document.getElementById('edit-attendee-form');
+  const editAttendeeBaseRateDisplay = document.getElementById('edit-attendee-base-rate-display');
+  const editAttendeeBonusInput = document.getElementById('edit-attendee-bonus');
+  const editAttendeeDeductionsInput = document.getElementById('edit-attendee-deductions');
+  const addEditExtraTaskBtn = document.getElementById('add-edit-extra-task-btn');
+  const editExtraTasksContainer = document.getElementById('edit-extra-tasks-container');
+  const editAttendeeLiveNet = document.getElementById('edit-attendee-live-net');
+  const editAttendeeModalTitle = document.getElementById('edit-attendee-modal-title');
+  const editAttendeeModalSubtitle = document.getElementById('edit-attendee-modal-subtitle');
+
   // DOM Elements - Team Management Section
   const addTeamForm = document.getElementById('add-team-form');
   const teamMemberName = document.getElementById('team-member-name');
@@ -203,6 +216,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   let searchQuery = '';
   let activeEventId = null;
   let currentEditEventId = null;
+  let currentEditAttendeeMemberId = null;
+  let currentEditAttendeeEventId = null;
   let currentUserRole = 'user';
 
   // Helper: Format Current Month (YYYY-MM)
@@ -1444,17 +1459,248 @@ document.addEventListener('DOMContentLoaded', async () => {
         <td>${extraTasksHTML}</td>
         <td><strong style="color: var(--accent-mustard); font-size: 15px;">${att.netAmount || 0} ج.م</strong></td>
         <td>
-          <button 
-            class="btn-action-sm" 
-            onclick="removeAttendeeFromEvent('${evt.id}', '${att.memberId}')" 
-            title="إزالة هذا العضو من الحفلة"
-          >
-            <i class="fa-solid fa-user-minus"></i>
-            إزالة
-          </button>
+          <div class="table-actions">
+            <button 
+              class="action-btn edit-btn" 
+              onclick="openEditAttendeeModal('${evt.id}', '${att.memberId}')" 
+              title="تعديل مستحقات العضو"
+            >
+              <i class="fa-solid fa-pen"></i>
+            </button>
+            <button 
+              class="btn-action-sm" 
+              onclick="removeAttendeeFromEvent('${evt.id}', '${att.memberId}')" 
+              title="إزالة هذا العضو من الحفلة"
+            >
+              <i class="fa-solid fa-user-minus"></i>
+              إزالة
+            </button>
+          </div>
         </td>
       `;
       modalAttendeesTableBody.appendChild(row);
+    });
+  }
+
+  // --- Dynamic Custom Extra Tasks inside Edit Attendee Modal ---
+  function createEditExtraTaskRow(desc = '', amount = '') {
+    if (!editExtraTasksContainer) return;
+    const row = document.createElement('div');
+    row.className = 'extra-task-row';
+
+    row.innerHTML = `
+      <input type="text" class="form-input task-desc-input" placeholder="اسم المهمة (مثال: مواصلات زيادة، شغل إضافي)" value="${escapeHTML(desc)}" required>
+      <input type="number" class="form-input task-amount-input" placeholder="القيمة (ج.م)" min="0" value="${amount}" required>
+      <button type="button" class="btn-remove-task" title="حذف هذه المهمة">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    `;
+
+    const amtInput = row.querySelector('.task-amount-input');
+    amtInput.addEventListener('input', calculateEditAttendeeLiveNet);
+
+    const removeBtn = row.querySelector('.btn-remove-task');
+    removeBtn.addEventListener('click', () => {
+      row.remove();
+      calculateEditAttendeeLiveNet();
+    });
+
+    editExtraTasksContainer.appendChild(row);
+  }
+
+  if (addEditExtraTaskBtn) {
+    addEditExtraTaskBtn.addEventListener('click', () => {
+      createEditExtraTaskRow();
+    });
+  }
+
+  function calculateEditAttendeeLiveNet() {
+    const base = Number(editAttendeeBaseRateDisplay ? editAttendeeBaseRateDisplay.value : 0) || 0;
+    const bonus = Number(editAttendeeBonusInput ? editAttendeeBonusInput.value : 0) || 0;
+    const deductions = Number(editAttendeeDeductionsInput ? editAttendeeDeductionsInput.value : 0) || 0;
+
+    let extraTasksTotal = 0;
+    if (editExtraTasksContainer) {
+      const taskRows = editExtraTasksContainer.querySelectorAll('.extra-task-row');
+      taskRows.forEach(row => {
+        const amtInput = row.querySelector('.task-amount-input');
+        if (amtInput) {
+          extraTasksTotal += (Number(amtInput.value) || 0);
+        }
+      });
+    }
+
+    const net = base + bonus + extraTasksTotal - deductions;
+    if (editAttendeeLiveNet) {
+      editAttendeeLiveNet.textContent = `${net} ج.م`;
+    }
+    return net;
+  }
+
+  if (editAttendeeBonusInput) editAttendeeBonusInput.addEventListener('input', calculateEditAttendeeLiveNet);
+  if (editAttendeeDeductionsInput) editAttendeeDeductionsInput.addEventListener('input', calculateEditAttendeeLiveNet);
+
+  // --- Open & Manage Edit Attendee Modal ---
+  window.openEditAttendeeModal = function (eventId, memberId) {
+    const evt = eventsList.find(e => e.id === eventId);
+    if (!evt) return;
+
+    const attendees = evt.attendees || [];
+    const att = attendees.find(a => a.memberId === memberId);
+    if (!att) return;
+
+    currentEditAttendeeEventId = eventId;
+    currentEditAttendeeMemberId = memberId;
+
+    if (editAttendeeModalTitle) {
+      editAttendeeModalTitle.textContent = `تعديل مستحقات: ${att.name}`;
+    }
+    if (editAttendeeModalSubtitle) {
+      editAttendeeModalSubtitle.textContent = `الرتبة: ${att.rank || '-'} | الحفلة: ${evt.name}`;
+    }
+
+    if (editAttendeeBaseRateDisplay) editAttendeeBaseRateDisplay.value = att.baseRate || 0;
+    if (editAttendeeBonusInput) editAttendeeBonusInput.value = att.bonus || 0;
+    if (editAttendeeDeductionsInput) editAttendeeDeductionsInput.value = att.deductions || 0;
+
+    if (editExtraTasksContainer) {
+      editExtraTasksContainer.innerHTML = '';
+      if (att.extraTasks && Array.isArray(att.extraTasks)) {
+        att.extraTasks.forEach(task => {
+          createEditExtraTaskRow(task.description || '', task.amount || '');
+        });
+      }
+    }
+
+    calculateEditAttendeeLiveNet();
+
+    if (editAttendeeModal) {
+      editAttendeeModal.style.display = 'flex';
+    }
+  };
+
+  function closeEditAttendeeModal() {
+    if (editAttendeeModal) {
+      editAttendeeModal.style.display = 'none';
+    }
+    currentEditAttendeeMemberId = null;
+    currentEditAttendeeEventId = null;
+  }
+
+  if (closeEditAttendeeModalBtn) {
+    closeEditAttendeeModalBtn.addEventListener('click', closeEditAttendeeModal);
+  }
+
+  if (editAttendeeModal) {
+    editAttendeeModal.addEventListener('click', (e) => {
+      if (e.target === editAttendeeModal) {
+        closeEditAttendeeModal();
+      }
+    });
+  }
+
+  if (editAttendeeForm) {
+    editAttendeeForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!currentEditAttendeeEventId || !currentEditAttendeeMemberId) return;
+
+      const evt = eventsList.find(e => e.id === currentEditAttendeeEventId);
+      if (!evt) return;
+
+      const attendees = evt.attendees ? [...evt.attendees] : [];
+      const attIndex = attendees.findIndex(a => a.memberId === currentEditAttendeeMemberId);
+      if (attIndex === -1) return;
+
+      const currentAtt = attendees[attIndex];
+      const baseRate = Number(currentAtt.baseRate) || 0;
+      const bonus = Number(editAttendeeBonusInput.value) || 0;
+      const deductions = Number(editAttendeeDeductionsInput.value) || 0;
+
+      // Extract custom extra tasks from edit modal
+      const extraTasks = [];
+      if (editExtraTasksContainer) {
+        const taskRows = editExtraTasksContainer.querySelectorAll('.extra-task-row');
+        taskRows.forEach(row => {
+          const descInput = row.querySelector('.task-desc-input');
+          const amtInput = row.querySelector('.task-amount-input');
+          if (descInput && amtInput) {
+            const d = descInput.value.trim();
+            const a = Number(amtInput.value) || 0;
+            if (d && a > 0) {
+              extraTasks.push({ description: d, amount: a });
+            }
+          }
+        });
+      }
+
+      const extraTasksTotal = extraTasks.reduce((sum, t) => sum + (Number(t.amount) || 0), 0);
+      const netPay = baseRate + bonus + extraTasksTotal - deductions;
+
+      const updatedAttendeeObj = {
+        ...currentAtt,
+        bonus: bonus,
+        deductions: deductions,
+        extraTasks: extraTasks,
+        netAmount: netPay
+      };
+
+      attendees[attIndex] = updatedAttendeeObj;
+
+      const saveBtn = document.getElementById('save-attendee-edit-btn');
+      const originalHTML = saveBtn ? saveBtn.innerHTML : '';
+      if (saveBtn) {
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> جاري الحفظ...';
+      }
+
+      try {
+        // Update main event document in Firestore
+        const eventDocRef = doc(db, "events", currentEditAttendeeEventId);
+        await updateDoc(eventDocRef, {
+          attendees: attendees
+        });
+
+        // Also update standalone attendance document if present
+        try {
+          const attQ = query(
+            collection(db, "attendance"), 
+            where("eventId", "==", currentEditAttendeeEventId),
+            where("memberId", "==", currentEditAttendeeMemberId)
+          );
+          const attSnap = await getDocs(attQ);
+          attSnap.forEach(attDoc => {
+            updateDoc(attDoc.ref, {
+              bonus: bonus,
+              deductions: deductions,
+              extraTasks: extraTasks,
+              netAmount: netPay
+            });
+          });
+        } catch (colErr) {
+          console.warn("No standalone attendance doc found:", colErr);
+        }
+
+        showToast(`تم تحديث مستحقات العضو "${currentAtt.name}" بنجاح!`, "success");
+
+        // Update local memory state
+        evt.attendees = attendees;
+
+        closeEditAttendeeModal();
+
+        // Immediate UI auto-refresh
+        renderModalAttendeesList(evt);
+        renderEventsTable();
+        renderMonthlySettlements();
+      } catch (err) {
+        console.error("Error updating attendee financials:", err);
+        showToast("فشل في تحديث بيانات العضو.", "danger");
+      } finally {
+        if (saveBtn) {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalHTML;
+        }
+      }
     });
   }
 

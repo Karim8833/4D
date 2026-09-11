@@ -814,6 +814,72 @@
     </div>
   </div>
 
+  <!-- 4. Edit Attendee Financials Modal -->
+  <div id="edit-attendee-modal" class="modal custom-modal-backdrop nested-modal" style="display: none;">
+    <div class="custom-modal-dialog" style="max-width: 550px;">
+      <div class="custom-modal-header">
+        <div>
+          <h3 class="modal-title" id="edit-attendee-modal-title">تعديل مستحقات العضو</h3>
+          <span class="modal-subtitle" id="edit-attendee-modal-subtitle">تعديل البونص والخصومات والمهام الإضافية</span>
+        </div>
+        <button class="modal-close-btn" id="close-edit-attendee-modal-btn" title="إغلاق">&times;</button>
+      </div>
+
+      <div class="custom-modal-body">
+        <form id="edit-attendee-form" novalidate>
+          <div class="form-group">
+            <label for="edit-attendee-base-rate-display" class="form-label">الأجر الأساسي (ج.م)</label>
+            <input type="number" id="edit-attendee-base-rate-display" class="form-input" readonly disabled style="opacity: 0.7;">
+          </div>
+
+          <div class="form-group">
+            <label for="edit-attendee-bonus" class="form-label">البونص (ج.م)</label>
+            <div class="input-icon-wrapper">
+              <input type="number" id="edit-attendee-bonus" class="form-input" placeholder="0" min="0" required>
+              <span class="input-icon">ج.م</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-attendee-deductions" class="form-label">الخصومات (ج.م)</label>
+            <div class="input-icon-wrapper">
+              <input type="number" id="edit-attendee-deductions" class="form-input" placeholder="0" min="0" required>
+              <span class="input-icon">ج.م</span>
+            </div>
+          </div>
+
+          <!-- Dynamic Custom Extra Tasks (مهام إضافية) -->
+          <div class="extra-tasks-section" style="margin-top: 15px;">
+            <div class="extra-tasks-header">
+              <label class="form-label" style="margin-bottom: 0;">
+                <i class="fa-solid fa-list-check" style="margin-left: 6px; color: var(--accent-mustard);"></i>
+                مهام إضافية:
+              </label>
+              <button type="button" id="add-edit-extra-task-btn" class="btn-secondary-sm">
+                <i class="fa-solid fa-plus"></i> إضافة مهمة
+              </button>
+            </div>
+
+            <div id="edit-extra-tasks-container" class="extra-tasks-container">
+              <!-- Dynamic Task input rows will be appended here -->
+            </div>
+          </div>
+
+          <!-- Live Calc Net Preview -->
+          <div class="attendee-calc-preview" style="margin-top: 15px;">
+            <span>صافي المستحق للعضو:</span>
+            <strong id="edit-attendee-live-net" class="live-net-value">0 ج.م</strong>
+          </div>
+
+          <button type="submit" class="btn-primary" id="save-attendee-edit-btn" style="margin-top: 20px;">
+            <i class="fa-solid fa-floppy-disk"></i>
+            حفظ التعديلات
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <!-- ==================== 3. HIDDEN ARABIC PDF STATEMENT TEMPLATE ==================== -->
   <div id="pdf-container-wrapper" style="position: absolute; left: -9999px; top: -9999px; width: 760px; max-width: 760px; background: #ffffff; color: #121212; font-family: 'Cairo', 'Tajawal', sans-serif;">
     <div id="pdf-statement-content" class="pdf-statement-page" dir="rtl">
